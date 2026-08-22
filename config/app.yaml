@@ -1,0 +1,39 @@
+app:
+  name: peluang-ai
+  log_level: INFO
+  timezone: Asia/Jakarta
+
+storage:
+  backend: local
+  local_path: /data/storage
+
+ingestion:
+  max_concurrent_requests: 20
+  request_timeout_s: 30
+  respect_robots_txt: true
+
+ocr:
+  engine: tesseract
+  languages: ind+eng
+  min_confidence: 0.6
+
+embedding:
+  model_key: text-embedding-3-small
+  dimensions: 1536
+  batch_size: 100
+
+recommendation:
+  precompute_cron: "0 6 * * *"
+  digest_cron: "0 7 * * *"
+  top_n: 20
+  cache_ttl_s: 86400
+
+notification:
+  telegram_rate_limit_per_min: 20
+  deadline_reminder_days: [3, 1]
+
+features:
+  telegram_notifications: true
+  image_extraction: true
+  feedback_agent: true
+  discovery_agent: true

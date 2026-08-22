@@ -1,0 +1,30 @@
+discovery:
+  max_steps: 10
+  max_llm_calls: 2
+  max_runtime_s: 90
+  max_exploration_depth: 3
+
+extraction:
+  max_steps: 8
+  max_llm_calls: 2
+  max_runtime_s: 60
+  batch_size: 3
+
+recovery:
+  max_attempts: 2
+  max_steps: 8
+  max_llm_calls: 3
+  max_runtime_s: 60
+  same_strategy_retry: 1
+
+recommendation:
+  max_steps: 6
+  max_llm_calls: 2
+  max_runtime_s: 15
+
+feedback:
+  max_steps: 8
+  max_llm_calls: 2
+  max_runtime_s: 20
+  min_events_required: 5
+  confidence_threshold: 0.7
