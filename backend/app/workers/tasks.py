@@ -1,5 +1,6 @@
 import uuid
 
+from sqlalchemy import text
 from sqlalchemy.ext.asyncio import async_sessionmaker
 
 from app.infrastructure.database import engine
@@ -211,14 +212,48 @@ async def deduplicate_opportunity_task(ctx: dict, opportunity_id: str) -> dict:
 
 async def generate_recommendation_task(ctx: dict, user_id: str | None = None) -> dict:
     logger.info("recommendation_task_start", user_id=user_id)
-    return {"status": "ok", "task": "generate_recommendation", "stub": True}
+    from app.modules.recommendation.service import RecommendationService
+
+    async with async_session_factory() as session:
+        svc = RecommendationService(session)
+        if user_id:
+            result = await svc.generate(uuid.UUID(user_id), trigger="cron")
+            return {"status": "ok", "result": result}
+
+        result = await session.execute(text("SELECT id FROM users WHERE is_active = TRUE"))
+        users = [row[0] for row in result.fetchall()]
+        total = 0
+        for uid in users:
+            await svc.generate(uid, trigger="cron")
+            total += 1
+        return {"status": "ok", "users_processed": total}
 
 
 async def feedback_agent_task(ctx: dict, user_id: str | None = None) -> dict:
     logger.info("feedback_agent_task_start", user_id=user_id)
-    return {"status": "ok", "task": "feedback_agent", "stub": True}
+    from app.modules.behavior.feedback_service import FeedbackService
+
+    async with async_session_factory() as session:
+        svc = FeedbackService(session)
+        if user_id:
+            result = await svc.run_feedback_cycle(uuid.UUID(user_id))
+            return {"status": "ok", "result": result}
+
+        result = await session.execute(text("SELECT id FROM users WHERE is_active = TRUE"))
+        users = [row[0] for row in result.fetchall()]
+        processed = 0
+        for uid in users:
+            await svc.run_feedback_cycle(uid)
+            processed += 1
+        return {"status": "ok", "users_processed": processed}
 
 
 async def dispatch_notifications_task(ctx: dict) -> dict:
     logger.info("dispatch_notifications_task_start")
-    return {"status": "ok", "task": "dispatch_notifications", "stub": True}
+    from app.modules.notification.service import NotificationService
+
+    async with async_session_factory() as session:
+        svc = NotificationService(session)
+        scheduled = await svc.schedule_deadline_reminders()
+        sent = await svc.dispatch_due()
+        return {"status": "ok", "scheduled": scheduled, "sent": sent}

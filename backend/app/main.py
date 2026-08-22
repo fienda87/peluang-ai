@@ -4,6 +4,7 @@ from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 
 from app.api.auth_routes import router as auth_router
+from app.api.behavior_routes import router as behavior_router
 from app.api.opportunity_routes import router as opportunity_router
 from app.api.recommendation_routes import router as recommendation_router
 from app.shared.logging import get_logger, setup_logging
@@ -28,6 +29,7 @@ app = FastAPI(
 app.include_router(auth_router)
 app.include_router(opportunity_router)
 app.include_router(recommendation_router)
+app.include_router(behavior_router)
 
 
 @app.get("/healthz")
