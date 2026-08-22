@@ -11,6 +11,7 @@ from app.workers.tasks import (
     feedback_agent_task,
     generate_recommendation_task,
     recover_extraction_task,
+    retention_purge_task,
 )
 
 setup_logging()
@@ -34,10 +35,12 @@ class WorkerSettings:
         generate_recommendation_task,
         feedback_agent_task,
         dispatch_notifications_task,
+        retention_purge_task,
     ]
     cron_jobs = [
         cron(generate_recommendation_task, hour=6, minute=0),
         cron(dispatch_notifications_task, hour=7, minute=0),
+        cron(retention_purge_task, day=1, hour=3, minute=0),
     ]
     on_startup = on_startup
     on_shutdown = on_shutdown

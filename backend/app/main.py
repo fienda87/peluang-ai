@@ -6,6 +6,7 @@ from fastapi.responses import JSONResponse
 from app.api.admin_routes import router as admin_router
 from app.api.auth_routes import router as auth_router
 from app.api.behavior_routes import router as behavior_router
+from app.api.middleware import RateLimitMiddleware
 from app.api.opportunity_routes import router as opportunity_router
 from app.api.recommendation_routes import router as recommendation_router
 from app.shared.logging import get_logger, setup_logging
@@ -26,6 +27,8 @@ app = FastAPI(
     version="0.1.0",
     lifespan=lifespan,
 )
+
+app.add_middleware(RateLimitMiddleware)
 
 app.include_router(auth_router)
 app.include_router(opportunity_router)

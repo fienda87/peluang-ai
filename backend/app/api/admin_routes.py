@@ -5,6 +5,7 @@ from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.infrastructure.database import get_session
+from app.modules.analytics.service import AnalyticsService
 
 router = APIRouter(prefix="/admin", tags=["admin"])
 
@@ -95,3 +96,24 @@ async def list_agent_runs(
         }
         for r in rows
     ]
+
+
+@router.get("/metrics/agents")
+async def agent_metrics(session: AsyncSession = Depends(get_session)):
+    return await AnalyticsService(session).get_agent_metrics()
+
+
+@router.get("/metrics/extraction")
+async def extraction_metrics(session: AsyncSession = Depends(get_session)):
+    rate = await AnalyticsService(session).get_extraction_success_rate()
+    return {"extraction_success_rate": rate}
+
+
+@router.get("/metrics/recommendations")
+async def recommendation_metrics(session: AsyncSession = Depends(get_session)):
+    return await AnalyticsService(session).get_recommendation_metrics()
+
+
+@router.get("/metrics/beta")
+async def beta_metrics(session: AsyncSession = Depends(get_session)):
+    return await AnalyticsService(session).get_beta_metrics()

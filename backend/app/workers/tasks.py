@@ -257,3 +257,12 @@ async def dispatch_notifications_task(ctx: dict) -> dict:
         scheduled = await svc.schedule_deadline_reminders()
         sent = await svc.dispatch_due()
         return {"status": "ok", "scheduled": scheduled, "sent": sent}
+
+
+async def retention_purge_task(ctx: dict) -> dict:
+    logger.info("retention_purge_task_start")
+    from app.modules.analytics.retention import RetentionService
+
+    async with async_session_factory() as session:
+        results = await RetentionService(session).purge_old_data()
+        return {"status": "ok", "purged": results}
