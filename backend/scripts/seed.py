@@ -176,6 +176,11 @@ async def seed() -> None:
             )
 
         for i, opp in enumerate(OPPORTUNITIES):
+            from datetime import date as date_type
+
+            end_date = (
+                date_type.fromisoformat(opp["end_date"]) if opp.get("end_date") else None
+            )
             await session.execute(
                 text(
                     "INSERT INTO opportunities (id, source_id, title, slug, url, category, organizer, location, description, prize, end_date, status) "
@@ -185,7 +190,8 @@ async def seed() -> None:
                     "id": uuid.uuid4(),
                     "source_id": source_ids[i % len(source_ids)],
                     "prize": opp.get("prize"),
-                    **opp,
+                    "end_date": end_date,
+                    **{k: v for k, v in opp.items() if k != "end_date"},
                 },
             )
 

@@ -90,7 +90,7 @@ class RecommendationService:
                 "opportunity_id": str(r[0]),
                 "score": float(r[1]),
                 "rank": r[2],
-                "reasoning": json.loads(r[3]) if r[3] else {},
+                "reasoning": r[3] if isinstance(r[3], dict) else (json.loads(r[3]) if r[3] else {}),
                 "title": r[4],
                 "slug": r[5],
                 "category": r[6],
