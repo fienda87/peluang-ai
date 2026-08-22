@@ -1,0 +1,155 @@
+{
+  "beasiswa_lpdp_2026.html": {
+    "title": "Beasiswa LPDP 2026 Tahap 1",
+    "category": "beasiswa",
+    "end_date": "2026-03-31",
+    "organizer": "Kementerian Keuangan RI",
+    "gpa_requirement": 3.0,
+    "doc_type": "HTML"
+  },
+  "magang_kampus_merdeka.html": {
+    "title": "Magang Bersertifikat Kampus Merdeka Batch 8",
+    "category": "magang",
+    "end_date": "2026-02-28",
+    "organizer": "Kemdikbudristek",
+    "doc_type": "HTML"
+  },
+  "lomba_data_science.html": {
+    "title": "Kompetisi Data Science Nasional 2026",
+    "category": "lomba",
+    "end_date": "2026-04-15",
+    "organizer": "Universitas Indonesia",
+    "prize": "Rp 100.000.000",
+    "doc_type": "HTML"
+  },
+  "fellowship_ai_brin.html": {
+    "title": "Fellowship Riset AI Indonesia",
+    "category": "fellowship",
+    "end_date": "2026-05-01",
+    "organizer": "BRIN",
+    "doc_type": "HTML"
+  },
+  "konferensi_teknologi.html": {
+    "title": "Konferensi Teknologi Mahasiswa Nasional",
+    "category": "konferensi",
+    "end_date": "2026-06-30",
+    "organizer": "ITB",
+    "doc_type": "HTML"
+  },
+  "volunteer_desa_digital.html": {
+    "title": "Volunteer Mengajar Desa Digital",
+    "category": "volunteer",
+    "end_date": "2026-03-15",
+    "organizer": "Kominfo",
+    "doc_type": "HTML"
+  },
+  "pelatihan_cloud.html": {
+    "title": "Pelatihan Cloud Computing Gratis",
+    "category": "pelatihan",
+    "end_date": "2026-02-20",
+    "organizer": "Google Developer Student Club",
+    "doc_type": "HTML"
+  },
+  "beasiswa_unggulan.html": {
+    "title": "Beasiswa Unggulan Kemendikbud 2026",
+    "category": "beasiswa",
+    "end_date": "2026-07-31",
+    "organizer": "Kemdikbudristek",
+    "gpa_requirement": 3.25,
+    "doc_type": "HTML"
+  },
+  "lomba_business_plan.html": {
+    "title": "Lomba Business Plan Nasional",
+    "category": "lomba",
+    "end_date": "2026-04-30",
+    "organizer": "Universitas Gadjah Mada",
+    "doc_type": "HTML"
+  },
+  "riset_brin.html": {
+    "title": "Program Riset Mahasiswa BRIN",
+    "category": "riset",
+    "end_date": "2026-08-31",
+    "organizer": "BRIN",
+    "doc_type": "HTML"
+  },
+  "beasiswa_djarum.pdf": {
+    "title": "Beasiswa Djarum Plus 2026",
+    "doc_type": "PDF"
+  },
+  "lomba_hackathon.pdf": {
+    "title": "Hackathon Nasional 2026",
+    "doc_type": "PDF"
+  },
+  "magang_bumn.pdf": {
+    "title": "Magang BUMN 2026",
+    "doc_type": "PDF"
+  },
+  "fellowship_kominfo.pdf": {
+    "title": "Fellowship Digital Talent Kominfo",
+    "doc_type": "PDF"
+  },
+  "konferensi_ilmiah.pdf": {
+    "title": "Konferensi Ilmiah Mahasiswa Nasional",
+    "doc_type": "PDF"
+  },
+  "volunteer_lingkungan.pdf": {
+    "title": "Volunteer Lingkungan Hidup",
+    "doc_type": "PDF"
+  },
+  "pelatihan_ai.pdf": {
+    "title": "Pelatihan AI dan Machine Learning",
+    "doc_type": "PDF"
+  },
+  "beasiswa_tanoto.pdf": {
+    "title": "Beasiswa Tanoto Foundation 2026",
+    "doc_type": "PDF"
+  },
+  "lomba_esai.pdf": {
+    "title": "Lomba Esai Nasional 2026",
+    "doc_type": "PDF"
+  },
+  "riset_kedokteran.pdf": {
+    "title": "Program Riset Kedokteran 2026",
+    "doc_type": "PDF"
+  },
+  "poster_beasiswa_chevening.png": {
+    "title": "Beasiswa Chevening 2026",
+    "doc_type": "IMAGE"
+  },
+  "poster_lomba_foto.png": {
+    "title": "Lomba Fotografi Nasional",
+    "doc_type": "IMAGE"
+  },
+  "poster_magang_startup.png": {
+    "title": "Magang Startup Batch 5",
+    "doc_type": "IMAGE"
+  },
+  "poster_fellowship_jurnalis.png": {
+    "title": "Fellowship Jurnalis Muda",
+    "doc_type": "IMAGE"
+  },
+  "poster_seminar_ekonomi.png": {
+    "title": "Seminar Ekonomi Digital",
+    "doc_type": "IMAGE"
+  },
+  "poster_volunteer_pendidikan.png": {
+    "title": "Volunteer Pendidikan Anak",
+    "doc_type": "IMAGE"
+  },
+  "poster_workshop_design.png": {
+    "title": "Workshop UI/UX Design",
+    "doc_type": "IMAGE"
+  },
+  "poster_beasiswa_fulbright.png": {
+    "title": "Beasiswa Fulbright 2026",
+    "doc_type": "IMAGE"
+  },
+  "poster_kompetisi_robotik.png": {
+    "title": "Kompetisi Robotik Nasional",
+    "doc_type": "IMAGE"
+  },
+  "poster_pelatihan_bisnis.png": {
+    "title": "Pelatihan Kewirausahaan Muda",
+    "doc_type": "IMAGE"
+  }
+}
