@@ -168,15 +168,12 @@ def generate_html():
 
 def generate_pdf():
     from pypdf import PdfWriter
-    from pypdf.generic import NameObject, TextStringObject
 
     out = FIXTURES / "pdf"
     out.mkdir(parents=True, exist_ok=True)
     for f in PDF_FIXTURES:
         writer = PdfWriter()
         writer.add_blank_page(width=612, height=792)
-        page = writer.pages[0]
-        # pypdf tidak bisa render text tanpa reportlab; simpan text di metadata
         writer.add_metadata({"/Title": f["title"], "/Subject": f["text"]})
         with open(out / f["filename"], "wb") as fp:
             writer.write(fp)
@@ -193,7 +190,7 @@ def generate_images():
         draw = ImageDraw.Draw(img)
         try:
             font = ImageFont.truetype("arial.ttf", 28)
-        except (OSError, IOError):
+        except OSError:
             font = ImageFont.load_default()
         y = 50
         for line in f["text"].split("\n"):

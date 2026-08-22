@@ -2,8 +2,6 @@
 import json
 from pathlib import Path
 
-import pytest
-
 from app.modules.extraction.deterministic import DeterministicExtractor
 from app.modules.ingestion.detect import detect_doc_type
 

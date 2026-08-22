@@ -45,14 +45,24 @@ ruff check .
 alembic upgrade head
 ```
 
+## Frontend
+
+```bash
+cd frontend
+npm install
+npm run dev
+# Open http://localhost:3000
+```
+
 ## Architecture
 
 - **Backend:** Python + FastAPI (modular monolith)
 - **Task queue:** arq + Redis
 - **Database:** PostgreSQL 15 + pgvector + pg_trgm
 - **Agents:** LangGraph (5 bounded agents: Discovery, Extraction, Recovery, Recommendation, Feedback)
-- **Frontend:** Next.js (coming in M3)
-- **Telegram:** aiogram 3.x (coming in M3)
+- **Frontend:** Next.js 14 (App Router)
+- **Telegram:** aiogram 3.x
+- **AI:** OpenRouter (primary) + Ollama (local fallback)
 
 ## Project Structure
 
@@ -60,16 +70,18 @@ alembic upgrade head
 peluang-ai/
 ├── backend/
 │   ├── app/
-│   │   ├── api/            # HTTP routes
-│   │   ├── modules/        # Domain modules (identity, opportunities, ingestion, etc.)
+│   │   ├── api/            # HTTP routes (auth, opportunities, recommendations, behavior, admin)
+│   │   ├── modules/        # Domain modules (identity, opportunities, ingestion, extraction, etc.)
 │   │   ├── agents/         # LangGraph agents (discovery, extraction, recovery, recommendation, feedback)
 │   │   ├── infrastructure/ # DB, storage adapters
 │   │   ├── shared/         # Config, logging
 │   │   └── workers/        # arq tasks
 │   ├── migrations/         # Alembic
-│   ├── scripts/            # Seed, utilities
-│   └── tests/
-├── frontend/               # Next.js (M3)
+│   ├── scripts/            # Seed, fixtures, load test
+│   └── tests/              # Unit + fixture tests
+├── frontend/               # Next.js 14 dashboard
+│   ├── app/                # App router pages
+│   └── e2e/                # Playwright E2E tests
 ├── config/                 # YAML configs (agents, app)
 ├── docker/                 # Dockerfiles
 └── docs/adr/               # Architecture Decision Records
@@ -78,7 +90,9 @@ peluang-ai/
 ## Key Docs
 
 - `docs/adr/` — Architecture decisions
-- Implementation Plan: M0→M6 milestones
+- `IMPLEMENTATION_CHECKLIST.md` — M0→M6 milestone checklist
+- `CONTRIBUTING.md` — Contribution guide
+- `ARCHITECTURE.md` — System architecture overview
 
 ## License
 
