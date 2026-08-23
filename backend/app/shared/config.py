@@ -33,6 +33,8 @@ class Settings(BaseSettings):
     ai_embedding_model: str = "openai/text-embedding-3-small"
     ai_fallback_models: str = ""
 
+    embedding_backend: str = "local"
+
     telegram_bot_token: str = ""
     web_base_url: str = "http://localhost:3000"
 

@@ -1,16 +1,37 @@
+import json
 import uuid
 
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.modules.ai import AIPort
+from app.shared.config import get_settings
 from app.shared.logging import get_logger
 
 logger = get_logger("embedding")
 
+LOCAL_MODEL_NAME = "paraphrase-multilingual-MiniLM-L12-v2"
+
+_st_local_model = None
+
+
+def _get_local_model():
+    global _st_local_model
+    if _st_local_model is None:
+        from sentence_transformers import SentenceTransformer
+
+        logger.info("loading_local_embedding_model", model=LOCAL_MODEL_NAME)
+        _st_local_model = SentenceTransformer(LOCAL_MODEL_NAME)
+    return _st_local_model
+
+
+def embed_texts_local(texts: list[str]) -> list[list[float]]:
+    model = _get_local_model()
+    vectors = model.encode(texts, normalize_embeddings=True)
+    return [v.tolist() for v in vectors]
+
 
 class EmbeddingService:
-    def __init__(self, session: AsyncSession, ai: AIPort) -> None:
+    def __init__(self, session: AsyncSession, ai=None) -> None:
         self.session = session
         self.ai = ai
 
@@ -28,11 +49,17 @@ class EmbeddingService:
 
         return results
 
+    async def _backend_embed(self, texts: list[str]) -> list[list[float]]:
+        backend = get_settings().embedding_backend
+        if backend == "local":
+            return embed_texts_local(texts)
+        # openrouter (berbayar) — via AI port async
+        response = await self.ai.embed(texts)  # type: ignore[union-attr]
+        return response.embeddings
+
     async def _embed_batch(self, opportunity_ids: list[uuid.UUID]) -> dict[uuid.UUID, list[float]]:
         query_result = await self.session.execute(
-            text(
-                "SELECT id, title, description FROM opportunities WHERE id = ANY(:ids)"
-            ),
+            text("SELECT id, title, description FROM opportunities WHERE id = ANY(:ids)"),
             {"ids": opportunity_ids},
         )
         rows = query_result.fetchall()
@@ -44,20 +71,20 @@ class EmbeddingService:
         texts = [t[:2000].strip() for t in texts]
 
         try:
-            embedding_response = await self.ai.embed(texts)
+            embeddings = self._backend_embed(texts)
+            pairs = list(zip(rows, embeddings))
         except Exception as e:
             logger.error("embedding_failed", error=str(e), count=len(texts))
             return {}
 
         result_map = {}
-        for (opp_id, _, _), embedding in zip(rows, embedding_response.embeddings):
+        for (opp_id, _, _), embedding in pairs:
             result_map[opp_id] = embedding
 
         for opp_id, embedding in result_map.items():
-            embedding_str = str(embedding).replace("[", "[").replace("]", "]")
             await self.session.execute(
                 text("UPDATE opportunities SET embedding = :emb WHERE id = :id"),
-                {"emb": embedding_str, "id": opp_id},
+                {"emb": str(embedding), "id": opp_id},
             )
 
         await self.session.flush()
@@ -75,8 +102,6 @@ class EmbeddingService:
         if not row:
             return
 
-        import json
-
         major, skills_json, interests_json, goals_json = row
         skills = json.loads(skills_json) if skills_json else []
         interests = json.loads(interests_json) if interests_json else []
@@ -86,17 +111,16 @@ class EmbeddingService:
         profile_text = profile_text[:2000].strip()
 
         try:
-            embedding_response = await self.ai.embed([profile_text])
-            embedding = embedding_response.embeddings[0] if embedding_response.embeddings else None
+            embeddings = self._backend_embed([profile_text])
+            embedding = embeddings[0] if embeddings else None
         except Exception as e:
             logger.error("user_embedding_failed", user_id=str(user_id), error=str(e))
             return
 
         if embedding:
-            embedding_str = str(embedding)
             await self.session.execute(
                 text("UPDATE user_profiles SET embedding = :emb WHERE user_id = :uid"),
-                {"emb": embedding_str, "uid": user_id},
+                {"emb": str(embedding), "uid": user_id},
             )
             await self.session.flush()
             logger.info("user_embedding_stored", user_id=str(user_id))

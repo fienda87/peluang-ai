@@ -1,5 +1,6 @@
 """Real crawl pipeline shared by arq task and CLI."""
 
+import asyncio
 import uuid
 from urllib.parse import urlparse
 
@@ -116,6 +117,60 @@ class CrawlPipeline:
 
         return filtered
 
+    async def _fetch_smart(self, url: str):
+        """Tech Spec §10 ladder: HTTP dulu, Crawl4AI eskalasi bila tersedia."""
+        result = await self.fetcher.fetch(url)
+        tiny = len(result.content) < 800 if result.success else False
+        if result.success and not tiny:
+            return result
+
+        try:
+            from crawl4ai import AsyncWebCrawler  # type: ignore
+
+            logger.info("escalate_crawl4ai", url=url)
+
+            async def _run_c4():
+                async with AsyncWebCrawler() as crawler:
+                    return await crawler.arun(url=url)
+
+            r = await asyncio.wait_for(_run_c4(), timeout=60)
+            html = getattr(r, "html", "") or ""
+            if html:
+                from app.modules.ingestion.html_adapter import FetchResult
+
+                return FetchResult(
+                    url=url,
+                    content=html.encode("utf-8"),
+                    content_type="text/html",
+                    status_code=200,
+                    success=True,
+                    error=None,
+                )
+        except asyncio.TimeoutError:
+            logger.warning("crawl4ai_timeout", url=url)
+        except ImportError:
+            logger.debug("crawl4ai_not_installed", url=url)
+        except Exception as e:
+            logger.warning("crawl4ai_escalation_failed", url=url, error=str(e)[:120])
+        return result
+
+    async def _crawl_rss(self, source: dict) -> list[str]:
+        """Cabang access_method='rss': feedparser -> link item sebagai detail pages."""
+        from app.modules.ingestion.rss_api_adapter import RSSAdapter
+
+        feed = await RSSAdapter().fetch_feed(source["url"])
+        base_domain = urlparse(source["url"]).netloc.removeprefix("www.")
+        urls: list[str] = []
+        for item in feed:
+            link = item.link
+            if not link or urlparse(link).netloc.removeprefix("www.") != base_domain:
+                continue
+            if link not in urls:
+                urls.append(link)
+            if len(urls) >= MAX_DETAIL_PAGES:
+                break
+        return urls
+
     async def crawl(self, source_id: uuid.UUID) -> dict:
         source = await self._load_source(source_id)
         if not source:
@@ -127,22 +182,25 @@ class CrawlPipeline:
         new_doc_ids: list[str] = []
 
         try:
-            listing = await self.fetcher.fetch(source["url"])
-            if not listing.success or not listing.content:
-                raise RuntimeError(f"listing_fetch_failed: {listing.error}")
+            if source["access_method"] == "rss":
+                listing = None
+                detail_urls = await self._crawl_rss(source)
+            else:
+                listing = await self._fetch_smart(source["url"])
+                if not listing.success or not listing.content:
+                    raise RuntimeError(f"listing_fetch_failed: {listing.error}")
+                links = self.fetcher.extract_links(
+                    listing.content.decode("utf-8", errors="ignore"), source["url"]
+                )
+                detail_urls = self._filter_links(links, source["url"])
 
-            pages_found += 1
-            links = self.fetcher.extract_links(
-                listing.content.decode("utf-8", errors="ignore"), source["url"]
-            )
-            detail_urls = self._filter_links(links, source["url"])
-            pages_found += len(detail_urls)
+            pages_found += 1 + len(detail_urls)
 
             logger.info(
                 "crawl_listing_done",
                 source=source["name"],
-                links_total=len(links),
-                links_relevant=len(detail_urls),
+                links_total=len(detail_urls),
+                method=source["access_method"],
             )
 
             results = await self.fetcher.fetch_many(detail_urls)
