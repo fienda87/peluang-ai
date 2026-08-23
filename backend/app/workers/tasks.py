@@ -3,16 +3,13 @@ import uuid
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import async_sessionmaker
 
+from app.infrastructure import get_storage
 from app.infrastructure.database import engine
-from app.infrastructure.storage import get_storage
 from app.modules.ai import get_ai
 from app.modules.deduplication.service import DeduplicationService
-from app.modules.extraction.deterministic import DeterministicExtractor
-from app.modules.extraction.llm_service import LLMExtractionService
 from app.modules.extraction.validation import ValidationService
 from app.modules.extraction.vision_service import VisionExtractionService
-from app.modules.ingestion.html_adapter import HTMLFetcher
-from app.modules.ingestion.service import IngestionService
+from app.modules.ingestion.pipeline import CrawlPipeline
 from app.shared.logging import get_logger
 
 logger = get_logger("tasks")
@@ -25,95 +22,32 @@ async def crawl_source_task(ctx: dict, source_id: str) -> dict:
     source_uuid = uuid.UUID(source_id)
 
     async with async_session_factory() as session:
-        ingestion_svc = IngestionService(session, get_storage())
-        fetcher = HTMLFetcher()
+        pipeline = CrawlPipeline(session, get_storage())
+        result = await pipeline.crawl(source_uuid)
 
-        run_id = await ingestion_svc.start_run(source_uuid)
+    new_docs = result.get("new_documents", [])
+    if ctx.get("redis") and new_docs:
+        for doc_id in new_docs:
+            await ctx["redis"].enqueue_job("extract_document_task", doc_id)
 
-        urls_found = ["https://example.com/opp1", "https://example.com/opp2"]
-        results = await fetcher.fetch_many(urls_found)
-
-        success_count = 0
-        for result in results:
-            if result.success:
-                doc_id = await ingestion_svc.store_raw_document(
-                    source_id=source_uuid,
-                    doc_type="HTML",
-                    content=result.content,
-                    file_mime=result.content_type,
-                    ingestion_run_id=run_id,
-                )
-                if doc_id:
-                    success_count += 1
-
-        await ingestion_svc.finish_run(
-            run_id=run_id,
-            status="success",
-            pages_found=len(urls_found),
-            documents_stored=success_count,
-        )
-        await session.commit()
-
-    logger.info("crawl_source_task_done", source_id=source_id, docs=success_count)
-    return {"status": "ok", "documents_stored": success_count}
+    logger.info(
+        "crawl_source_task_done",
+        source_id=source_id,
+        status=result.get("status"),
+        docs=len(new_docs),
+    )
+    return {k: v for k, v in result.items() if k != "new_documents"} | {"queued_extractions": len(new_docs)}
 
 
 async def extract_document_task(ctx: dict, raw_document_id: str) -> dict:
     logger.info("extract_document_task_start", doc_id=raw_document_id)
-    doc_uuid = uuid.UUID(raw_document_id)
+    from app.modules.ingestion.processing import process_document
 
     async with async_session_factory() as session:
-        from sqlalchemy import text
+        result = await process_document(session, uuid.UUID(raw_document_id), redis=ctx.get("redis"))
 
-        result = await session.execute(
-            text("SELECT doc_type, extracted_text FROM raw_documents WHERE id = :id"),
-            {"id": doc_uuid},
-        )
-        row = result.one_or_none()
-
-        if not row:
-            logger.error("document_not_found", doc_id=raw_document_id)
-            return {"status": "error", "reason": "document_not_found"}
-
-        doc_type, extracted_text = row
-
-        if not extracted_text:
-            logger.warning("no_extracted_text", doc_id=raw_document_id)
-            extracted_text = ""
-
-        det_extractor = DeterministicExtractor()
-        det_result = det_extractor.extract_text(extracted_text)
-
-        llm_svc = LLMExtractionService(get_ai())
-        llm_result = await llm_svc.extract_single(extracted_text)
-
-        final_result = llm_result or det_result
-
-        validation_svc = ValidationService()
-        confidence = validation_svc.compute_overall_confidence(final_result)
-        status = validation_svc.determine_status(final_result, confidence)
-
-        import json
-
-        extraction_id = uuid.uuid4()
-        await session.execute(
-            text(
-                "INSERT INTO extraction_results (id, raw_document_id, strategy, extracted_data, "
-                "overall_confidence, status, version) VALUES (:id, :doc_id, :strategy, :data, :conf, :status, 1)"
-            ),
-            {
-                "id": extraction_id,
-                "doc_id": doc_uuid,
-                "strategy": "llm" if llm_result else "deterministic",
-                "data": json.dumps(final_result.to_dict()),
-                "conf": confidence,
-                "status": status,
-            },
-        )
-        await session.commit()
-
-    logger.info("extract_document_task_done", doc_id=raw_document_id, status=status, confidence=confidence)
-    return {"status": "ok", "extraction_status": status, "confidence": confidence}
+    logger.info("extract_document_task_done", doc_id=raw_document_id, result=result)
+    return result
 
 
 async def recover_extraction_task(ctx: dict, extraction_result_id: str) -> dict:

@@ -29,7 +29,7 @@ class IngestionService:
         await self.session.execute(
             text(
                 "INSERT INTO sources (id, name, source_type, source_url, access_method, crawl_frequency, meta) "
-                "VALUES (:id, :name, :source_type, :source_url, :access_method, :crawl_frequency, :meta::jsonb)"
+                "VALUES (:id, :name, :source_type, :source_url, :access_method, :crawl_frequency, CAST(:meta AS jsonb))"
             ),
             {
                 "id": source_id,
@@ -107,7 +107,7 @@ class IngestionService:
         await self.session.execute(
             text(
                 "INSERT INTO raw_documents (id, source_id, ingestion_run_id, doc_type, file_url, file_mime, file_size, checksum, meta) "
-                "VALUES (:id, :source_id, :ingestion_run_id, :doc_type, :file_url, :file_mime, :file_size, :checksum, :meta::jsonb)"
+                "VALUES (:id, :source_id, :ingestion_run_id, :doc_type, :file_url, :file_mime, :file_size, :checksum, CAST(:meta AS jsonb))"
             ),
             {
                 "id": doc_id,

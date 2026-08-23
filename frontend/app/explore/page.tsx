@@ -1,8 +1,19 @@
-async function searchOpportunities(q: string) {
+type Opportunity = {
+  id: string;
+  title: string;
+  slug: string;
+  category: string;
+  organizer?: string;
+  location?: string;
+  end_date?: string;
+};
+
+async function searchOpportunities(q: string): Promise<Opportunity[]> {
   try {
-    const res = await fetch(`http://localhost:8000/opportunities?q=${encodeURIComponent(q)}&limit=20`, {
-      cache: "no-store",
-    });
+    const res = await fetch(
+      `http://localhost:8000/opportunities?q=${encodeURIComponent(q)}&limit=20`,
+      { cache: "no-store" }
+    );
     if (!res.ok) return [];
     return await res.json();
   } catch {
@@ -19,31 +30,56 @@ export default async function ExplorePage({
   const results = await searchOpportunities(q);
 
   return (
-    <main className="container">
-      <h1>Jelajahi Peluang</h1>
-      <form action="/explore" method="GET" style={{ marginBottom: 20 }}>
+    <main className="page-shell">
+      <a className="back-link" href="/">← Beranda</a>
+      <h1>Jelajahi peluang</h1>
+      <p className="page-sub">
+        Cari beasiswa, lomba, magang, fellowship, dan peluang lain dari seluruh sumber yang sudah masuk pipeline.
+      </p>
+
+      <form className="search-form" action="/explore" method="GET">
         <input
           type="text"
           name="q"
           defaultValue={q}
-          placeholder="Cari beasiswa, lomba, magang..."
-          style={{ padding: "10px 14px", width: "100%", borderRadius: 8, border: "1px solid #d1d5db" }}
+          placeholder="Cari peluang… misalnya beasiswa, magang, riset"
         />
+        <button className="primary-button" type="submit">Cari</button>
       </form>
 
-      {results.length === 0 && <p className="muted">Tidak ada hasil.</p>}
+      {q && (
+        <p className="result-count">
+          {results.length} hasil untuk &ldquo;{q}&rdquo;
+        </p>
+      )}
 
-      {results.map((item: any) => (
-        <div key={item.id} className="card">
-          <h2>
-            <a href={`/opportunity/${item.slug}`}>{item.title}</a>
-          </h2>
-          <span className="badge">{item.category}</span>
-          <p className="muted">
-            {item.organizer} · {item.location} · Deadline: {item.end_date ?? "N/A"}
+      {results.length === 0 ? (
+        <div className="empty-state">
+          <h3>{q ? "Tidak ada hasil." : "Mulai dengan mencari sesuatu."}</h3>
+          <p>
+            {q
+              ? "Coba kata kunci lain seperti beasiswa, lomba, atau magang."
+              : "Data berasal dari pipeline ingestion lokal. Jalankan seed bila database masih kosong."}
           </p>
         </div>
-      ))}
+      ) : (
+        <div className="opportunity-list">
+          {results.map((item) => (
+            <article key={item.id} className="feed-card">
+              <div className="feed-card-top">
+                <span className="category-chip">{item.category}</span>
+                <span className="deadline-chip">{item.end_date ?? "Deadline belum pasti"}</span>
+              </div>
+              <h3>
+                <a href={`/opportunity/${item.slug}`}>{item.title}</a>
+              </h3>
+              <p>
+                {item.organizer ?? "Penyelenggara belum tercatat"} · {item.location ?? "Lokasi fleksibel"}
+              </p>
+            </article>
+          ))}
+        </div>
+      )}
     </main>
   );
 }

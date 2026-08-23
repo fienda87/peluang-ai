@@ -29,7 +29,15 @@ class DeduplicationService:
                 duplicates.append((url_match, "url_canonical", 0.95))
 
         if title and end_date:
-            result = await self.session.execute(
+            from datetime import date as date_cls
+
+            if isinstance(end_date, str):
+                try:
+                    end_date = date_cls.fromisoformat(end_date)
+                except ValueError:
+                    end_date = None
+            if end_date is not None:
+                result = await self.session.execute(
                 text(
                     "SELECT id, similarity(title, :title) as sim FROM opportunities "
                     "WHERE id != :id AND end_date = :end_date AND similarity(title, :title) > 0.8 "
@@ -77,7 +85,7 @@ class DeduplicationService:
         await self.session.execute(
             text(
                 "INSERT INTO dedup_decisions (opportunity_id, duplicate_of_id, method, is_duplicate) "
-                "VALUES (:id, NULL, 'canonical', FALSE) "
+                "VALUES (:id, NULL, 'manual', FALSE) "
                 "ON CONFLICT (opportunity_id) DO UPDATE SET duplicate_of_id = NULL, is_duplicate = FALSE"
             ),
             {"id": opportunity_id},
