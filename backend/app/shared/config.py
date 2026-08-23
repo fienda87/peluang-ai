@@ -31,6 +31,7 @@ class Settings(BaseSettings):
     ai_chat_model: str = "meta-llama/llama-3.1-8b-instruct:free"
     ai_vision_model: str = "google/gemini-flash-1.5"
     ai_embedding_model: str = "openai/text-embedding-3-small"
+    ai_fallback_models: str = ""
 
     telegram_bot_token: str = ""
     web_base_url: str = "http://localhost:3000"

@@ -68,7 +68,7 @@ class LLMExtractionService:
             response = await self.ai.chat(
                 messages=[{"role": "user", "content": prompt}],
                 temperature=0.0,
-                max_tokens=1000,
+                max_tokens=2500,
             )
         except AIProviderError as e:
             logger.error("single_extraction_failed", error=e.code)

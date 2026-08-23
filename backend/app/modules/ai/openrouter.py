@@ -18,6 +18,8 @@ class OpenRouterAdapter(AIPort):
         self.chat_model = s.ai_chat_model
         self.vision_model = s.ai_vision_model
         self.embedding_model = s.ai_embedding_model
+        raw = getattr(s, "ai_fallback_models", "") or ""
+        self.fallback_models = [m.strip() for m in raw.split(",") if m.strip()]
 
     def get_model(self, purpose: str = "chat") -> str:
         if purpose == "vision":
@@ -26,6 +28,10 @@ class OpenRouterAdapter(AIPort):
             return self.embedding_model
         return self.chat_model
 
+    def _model_chain(self, model_key: str | None) -> list[str]:
+        primary = model_key or self.chat_model
+        return [primary] + [m for m in self.fallback_models if m != primary]
+
     async def chat(
         self,
         messages: list[dict[str, str]],
@@ -33,21 +39,44 @@ class OpenRouterAdapter(AIPort):
         temperature: float = 0.0,
         max_tokens: int = 2048,
     ) -> AIResponse:
-        model = model_key or self.chat_model
-        payload = {
-            "model": model,
-            "messages": messages,
-            "temperature": temperature,
-            "max_tokens": max_tokens,
-        }
-        data = await self._post("/chat/completions", payload)
-        usage = data.get("usage", {})
-        return AIResponse(
-            content=data["choices"][0]["message"]["content"],
-            model=data.get("model", model),
-            tokens_used=usage.get("total_tokens", 0),
-            metadata=data,
-        )
+        last_error: AIProviderError | None = None
+        for model in self._model_chain(model_key):
+            payload = {
+                "model": model,
+                "messages": messages,
+                "temperature": temperature,
+                "max_tokens": max_tokens,
+            }
+            try:
+                data = await self._post("/chat/completions", payload)
+            except AIProviderError as e:
+                last_error = e
+                if e.code in ("PROVIDER_RATE_LIMIT", "PROVIDER_ERROR"):
+                    logger.warning("model_fallback", failed=model, code=e.code)
+                    continue
+                raise
+
+            usage = data.get("usage", {})
+            choices = data.get("choices") or []
+            if not choices:
+                logger.warning("empty_choices", model=model, body=str(data)[:200])
+                last_error = AIProviderError("Empty choices from provider", "PROVIDER_ERROR")
+                continue
+            message = choices[0].get("message", {})
+            content = message.get("content")
+            if content is None:
+                # Reasoning models may return reasoning-only when tokens run out
+                content = message.get("reasoning") or ""
+            return AIResponse(
+                content=content,
+                model=data.get("model", model),
+                tokens_used=usage.get("total_tokens", 0),
+                metadata=data,
+            )
+
+        if last_error:
+            raise last_error
+        raise AIProviderError("No models configured", "PROVIDER_ERROR")
 
     async def structured_extract(
         self,
@@ -87,7 +116,11 @@ class OpenRouterAdapter(AIPort):
         )
 
     async def _post(self, path: str, payload: dict) -> dict:
-        headers = {"Authorization": f"Bearer {self.api_key}"}
+        headers = {
+            "Authorization": f"Bearer {self.api_key}",
+            "HTTP-Referer": "https://peluang.ai",
+            "X-Title": "Peluang.ai",
+        }
         try:
             async with httpx.AsyncClient(timeout=60) as client:
                 resp = await client.post(f"{self.base_url}{path}", json=payload, headers=headers)
