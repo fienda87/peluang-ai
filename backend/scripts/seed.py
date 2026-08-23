@@ -43,110 +43,6 @@ SOURCES = [
     },
 ]
 
-OPPORTUNITIES = [
-    {
-        "title": "Beasiswa LPDP 2026 Tahap 1",
-        "slug": "beasiswa-lpdp-2026-tahap-1",
-        "url": "https://www.lpdp.kemenkeu.go.id/beasiswa-2026-tahap-1",
-        "category": "beasiswa",
-        "organizer": "Kementerian Keuangan RI",
-        "location": "Seluruh Indonesia",
-        "description": "Beasiswa penuh untuk studi S2/S3 dalam dan luar negeri.",
-        "end_date": future(45),
-    },
-    {
-        "title": "Magang Bersertifikat Kampus Merdeka Batch 8",
-        "slug": "magang-kampus-merdeka-batch-8",
-        "url": "https://kampusmerdeka.kemdikbud.go.id/magang-batch-8",
-        "category": "magang",
-        "organizer": "Kemdikbudristek",
-        "location": "Seluruh Indonesia",
-        "description": "Program magang 6 bulan di perusahaan mitra dengan konversi SKS.",
-        "end_date": future(30),
-    },
-    {
-        "title": "Kompetisi Data Science Nasional 2026",
-        "slug": "kompetisi-data-science-2026",
-        "url": "https://example.com/kompetisi-ds-2026",
-        "category": "lomba",
-        "organizer": "Universitas Indonesia",
-        "location": "Jakarta",
-        "description": "Kompetisi analisis data untuk mahasiswa S1 seluruh Indonesia.",
-        "prize": "Total hadiah Rp 100.000.000",
-        "end_date": future(60),
-    },
-    {
-        "title": "Fellowship Riset AI Indonesia",
-        "slug": "fellowship-riset-ai-indonesia",
-        "url": "https://example.com/fellowship-ai",
-        "category": "fellowship",
-        "organizer": "BRIN",
-        "location": "Bandung",
-        "description": "Fellowship riset 3 bulan di bidang AI untuk mahasiswa S2.",
-        "end_date": future(90),
-    },
-    {
-        "title": "Konferensi Teknologi Mahasiswa Nasional",
-        "slug": "konferensi-teknologi-mahasiswa-2026",
-        "url": "https://example.com/konferensi-teknologi",
-        "category": "konferensi",
-        "organizer": "ITB",
-        "location": "Bandung",
-        "description": "Konferensi tahunan presentasi paper teknologi oleh mahasiswa.",
-        "end_date": future(120),
-    },
-    {
-        "title": "Volunteer Mengajar Desa Digital",
-        "slug": "volunteer-mengajar-desa-digital",
-        "url": "https://example.com/volunteer-desa-digital",
-        "category": "volunteer",
-        "organizer": "Kominfo",
-        "location": "Jawa Tengah",
-        "description": "Program volunteer literasi digital di desa-desa selama 2 minggu.",
-        "end_date": future(21),
-    },
-    {
-        "title": "Pelatihan Cloud Computing Gratis",
-        "slug": "pelatihan-cloud-computing-2026",
-        "url": "https://example.com/pelatihan-cloud",
-        "category": "pelatihan",
-        "organizer": "Google Developer Student Club",
-        "location": "Online",
-        "description": "Pelatihan gratis Google Cloud Platform untuk mahasiswa.",
-        "end_date": future(14),
-    },
-    {
-        "title": "Beasiswa Unggulan Kemendikbud 2026",
-        "slug": "beasiswa-unggulan-kemendikbud-2026",
-        "url": "https://example.com/beasiswa-unggulan",
-        "category": "beasiswa",
-        "organizer": "Kemdikbudristek",
-        "location": "Seluruh Indonesia",
-        "description": "Beasiswa S1/S2/S3 untuk mahasiswa berprestasi.",
-        "end_date": future(150),
-    },
-    {
-        "title": "Lomba Business Plan Nasional",
-        "slug": "lomba-business-plan-nasional-2026",
-        "url": "https://example.com/lomba-bisnis-plan",
-        "category": "lomba",
-        "organizer": "Universitas Gadjah Mada",
-        "location": "Yogyakarta",
-        "description": "Kompetisi rencana bisnis untuk mahasiswa dengan mentoring.",
-        "prize": "Total hadiah Rp 50.000.000",
-        "end_date": future(75),
-    },
-    {
-        "title": "Program Riset Mahasiswa BRIN",
-        "slug": "program-riset-mahasiswa-brin-2026",
-        "url": "https://example.com/riset-brin",
-        "category": "riset",
-        "organizer": "BRIN",
-        "location": "Seluruh Indonesia",
-        "description": "Pendanaan riset mahasiswa S1/S2 di laboratorium BRIN.",
-        "end_date": future(180),
-    },
-]
 
 TEST_USER = {
     "email": "test@peluang.ai",
@@ -188,32 +84,8 @@ async def seed() -> None:
                 {"id": sid, **src},
             )
 
-        for i, opp in enumerate(OPPORTUNITIES):
-            from datetime import date as date_type
-
-            slug_check = await session.execute(
-                text("SELECT id FROM opportunities WHERE slug = :slug"),
-                {"slug": opp["slug"]},
-            )
-            if slug_check.scalar_one_or_none():
-                continue
-
-            end_date = (
-                date_type.fromisoformat(opp["end_date"]) if opp.get("end_date") else None
-            )
-            await session.execute(
-                text(
-                    "INSERT INTO opportunities (id, source_id, title, slug, url, category, organizer, location, description, prize, end_date, status) "
-                    "VALUES (:id, :source_id, :title, :slug, :url, :category, :organizer, :location, :description, :prize, :end_date, 'active')"
-                ),
-                {
-                    "id": uuid.uuid4(),
-                    "source_id": source_ids[i % len(source_ids)],
-                    "prize": opp.get("prize"),
-                    "end_date": end_date,
-                    **{k: v for k, v in opp.items() if k != "end_date"},
-                },
-            )
+        # Opportunity TIDAK di-seed lagi — data asli datang dari pipeline
+        # scraping (python -m scripts.crawl_once).
 
         existing_user = await session.execute(
             text("SELECT id FROM users WHERE email = :email"),
@@ -248,7 +120,7 @@ async def seed() -> None:
         )
 
         await session.commit()
-        print(f"Seeded: {len(SOURCES)} sources, {len(OPPORTUNITIES)} opportunities, 1 user.")
+        print(f"Seeded: {len(SOURCES)} sources, 1 user. Jalankan crawl_once untuk data asli.")
 
 
 if __name__ == "__main__":
