@@ -71,7 +71,7 @@ class EmbeddingService:
         texts = [t[:2000].strip() for t in texts]
 
         try:
-            embeddings = self._backend_embed(texts)
+            embeddings = await self._backend_embed(texts)
             pairs = list(zip(rows, embeddings))
         except Exception as e:
             logger.error("embedding_failed", error=str(e), count=len(texts))
@@ -103,15 +103,21 @@ class EmbeddingService:
             return
 
         major, skills_json, interests_json, goals_json = row
-        skills = json.loads(skills_json) if skills_json else []
-        interests = json.loads(interests_json) if interests_json else []
-        goals = json.loads(goals_json) if goals_json else []
+
+        def _as_list(v):
+            if isinstance(v, str):
+                return json.loads(v)
+            return v or []
+
+        skills = _as_list(skills_json)
+        interests = _as_list(interests_json)
+        goals = _as_list(goals_json)
 
         profile_text = f"{major} {' '.join(skills)} {' '.join(interests)} {' '.join(goals)}"
         profile_text = profile_text[:2000].strip()
 
         try:
-            embeddings = self._backend_embed([profile_text])
+            embeddings = await self._backend_embed([profile_text])
             embedding = embeddings[0] if embeddings else None
         except Exception as e:
             logger.error("user_embedding_failed", user_id=str(user_id), error=str(e))

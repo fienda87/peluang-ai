@@ -24,10 +24,10 @@ class EligibilityService:
         user_row = user_result.one_or_none()
 
         opp_result = await self.session.execute(
-            text("SELECT id FROM opportunity_requirements WHERE opportunity_id = :oid"),
+            text("SELECT req_type FROM opportunity_requirements WHERE opportunity_id = :oid"),
             {"oid": opportunity_id},
         )
-        reqs = opp_result.fetchall()
+        reqs = [r[0] for r in opp_result.fetchall()]
 
         if not user_row or not reqs:
             status = "UNKNOWN"

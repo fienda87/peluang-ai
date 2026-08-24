@@ -39,7 +39,7 @@ class MatchFeatureService:
 
         opp_category, opp_location, opp_end_date, opp_emb = opp_row
         user_interests_json, user_location, user_emb = user_row
-        user_interests = json.loads(user_interests_json) if user_interests_json else []
+        user_interests = json.loads(user_interests_json) if isinstance(user_interests_json, str) else (user_interests_json or [])
 
         category_fit = 1.0 if opp_category in user_interests else 0.3
 
