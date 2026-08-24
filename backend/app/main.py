@@ -3,6 +3,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 
+from app.api.admin_pipeline import router as admin_pipeline_router
 from app.api.admin_routes import router as admin_router
 from app.api.auth_routes import router as auth_router
 from app.api.behavior_routes import router as behavior_router
@@ -37,6 +38,7 @@ app.include_router(recommendation_router)
 app.include_router(behavior_router)
 app.include_router(profile_router)
 app.include_router(admin_router)
+app.include_router(admin_pipeline_router)
 
 
 @app.get("/healthz")

@@ -72,6 +72,16 @@ class CrawlPipeline:
             "access_method": row[3],
         }
 
+    async def _already_stored_urls(self, source_id: uuid.UUID) -> set[str]:
+        rows = await self.session.execute(
+            text(
+                "SELECT meta ->> 'source_page' FROM raw_documents "
+                "WHERE source_id = :sid AND meta ->> 'source_page' IS NOT NULL"
+            ),
+            {"sid": source_id},
+        )
+        return {r[0] for r in rows.fetchall()}
+
     def _filter_links(self, links: list[str], listing_url: str) -> list[str]:
         base_domain = urlparse(listing_url).netloc.removeprefix("www.")
         kw = _keyword_filter()
@@ -194,12 +204,19 @@ class CrawlPipeline:
                 )
                 detail_urls = self._filter_links(links, source["url"])
 
+            # Efisiensi: skip URL yang sudah pernah dicrawl untuk source ini
+            seen_urls = await self._already_stored_urls(source_id)
+            fresh_urls = [u for u in detail_urls if u not in seen_urls]
+            skipped = len(detail_urls) - len(fresh_urls)
+            detail_urls = fresh_urls
+
             pages_found += 1 + len(detail_urls)
 
             logger.info(
                 "crawl_listing_done",
                 source=source["name"],
                 links_total=len(detail_urls),
+                skipped_already_crawled=skipped,
                 method=source["access_method"],
             )
 
