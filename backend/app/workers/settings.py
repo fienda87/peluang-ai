@@ -7,6 +7,7 @@ from app.workers.tasks import (
     crawl_source_task,
     deduplicate_opportunity_task,
     dispatch_notifications_task,
+    expire_opportunities_task,
     extract_document_task,
     feedback_agent_task,
     generate_recommendation_task,
@@ -40,6 +41,7 @@ class WorkerSettings:
     cron_jobs = [
         cron(generate_recommendation_task, hour=6, minute=0),
         cron(dispatch_notifications_task, hour=7, minute=0),
+        cron(expire_opportunities_task, hour=1, minute=0),
         cron(retention_purge_task, day=1, hour=3, minute=0),
     ]
     on_startup = on_startup

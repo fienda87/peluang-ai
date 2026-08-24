@@ -33,9 +33,9 @@ class ExtractionSchema:
 EXTRACTION_PROMPT_TEMPLATE = """Extract structured opportunity data from text.
 Return valid JSON matching this schema:
 {{
-  "title": "string or null",
+  "title": "clean program/event name only - NO website navigation, menu items, 'Skip to content', or site name suffix",
   "description": "string or null",
-  "end_date": "YYYY-MM-DD or null",
+  "end_date": "deadline in YYYY-MM-DD, null if truly absent",
   "start_date": "YYYY-MM-DD or null",
   "organizer": "string or null",
   "location": "string or null",
@@ -45,7 +45,12 @@ Return valid JSON matching this schema:
   "field_confidence": {{"field_name": 0.0-1.0, ...}}
 }}
 
-Text:
-{text}
+Rules:
+- title: max 100 chars, the opportunity's own name (e.g. "Beasiswa Djarum Plus 2026")
+- end_date: look for words like deadline, batas akhir, penutupan, ditutup
+- Dates may be Indonesian format (e.g. 30 September 2026)
 
-Return ONLY the JSON object, no explanation."""
+Text:
+{{text}}
+
+Return ONLY the JSON object."""

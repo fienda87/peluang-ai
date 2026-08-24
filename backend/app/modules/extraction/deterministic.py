@@ -65,6 +65,23 @@ class DeterministicResult:
     fields_total: int = 8
 
 
+def clean_title(title: str) -> str:
+    """Bersihkan judul dari nav junk, HTML entities, dan suffix situs."""
+    import html as html_mod
+    import re
+
+    t = html_mod.unescape(title or "")
+    for junk in ("Skip to content", "Skip to main content", "Menu and widgets"):
+        t = re.sub(re.escape(junk), " | ", t, flags=re.I)
+    # potong di separator situs umum
+    t = re.split(r"\s+[|–—-]\s+", t)[0]
+    # buang sisa kata nav umum setelah potongan pertama
+    t = t.split(" :: ")[0]
+    t = re.sub(r"<[^>]+>", " ", t)
+    t = re.sub(r"\s+", " ", t).strip(" |–—-")
+    return t[:200]
+
+
 def strip_html(html: str) -> str:
     text = re.sub(r"<script[^>]*>.*?</script>", " ", html, flags=re.S | re.I)
     text = re.sub(r"<style[^>]*>.*?</style>", " ", text, flags=re.S | re.I)

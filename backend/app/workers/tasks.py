@@ -193,6 +193,15 @@ async def dispatch_notifications_task(ctx: dict) -> dict:
         return {"status": "ok", "scheduled": scheduled, "sent": sent}
 
 
+async def expire_opportunities_task(ctx: dict) -> dict:
+    logger.info("expire_opportunities_task_start")
+    from app.modules.opportunities.lifecycle import LifecycleService
+
+    async with async_session_factory() as session:
+        expired = await LifecycleService(session).expire_past_deadlines()
+        return {"status": "ok", "expired": expired}
+
+
 async def retention_purge_task(ctx: dict) -> dict:
     logger.info("retention_purge_task_start")
     from app.modules.analytics.retention import RetentionService

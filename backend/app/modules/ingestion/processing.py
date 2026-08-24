@@ -143,6 +143,10 @@ async def process_document(
         }
 
     data = final_state.final_result.to_dict()
+    if data.get("title"):
+        from app.modules.extraction.deterministic import clean_title
+
+        data["title"] = clean_title(str(data["title"]))
     extraction_id = uuid.uuid4()
     await session.execute(
         text(

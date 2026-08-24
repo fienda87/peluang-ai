@@ -1,3 +1,5 @@
+import OpportunityActions from "./actions";
+
 type Opportunity = {
   id: string;
   title: string;
@@ -7,6 +9,7 @@ type Opportunity = {
   location?: string;
   end_date?: string;
   prize?: string;
+  url?: string;
 };
 
 async function getOpportunity(slug: string): Promise<Opportunity | null> {
@@ -68,10 +71,10 @@ export default async function OpportunityPage({
         </dl>
 
         <div className="action-row">
-          <button className="primary-button" type="button">Simpan</button>
+          <OpportunityActions slug={opp.slug} />
           <a
             className="secondary-button"
-            href={opp.slug ? `/opportunity/${opp.slug}` : "#"}
+            href={opp.url || "#"}
             target="_blank"
             rel="noreferrer"
           >
