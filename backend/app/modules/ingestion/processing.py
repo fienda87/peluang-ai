@@ -275,7 +275,7 @@ async def process_document(
     publish(
         "extract.strategy",
         f"{icon} Ekstraksi {strategy_db} · conf {final_state.confidence:.2f} · "
-        f"LLM {final_state.llm_call_count}x",
+        f"LLM {final_state.llm_calls}x",
         level="success" if final_state.status == "valid" else "warn",
     )
 
