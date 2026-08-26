@@ -63,6 +63,7 @@ export default async function HomePage() {
           <span>Peluang.ai</span>
         </a>
         <div className="nav-pills">
+          <a href="/dashboard">Dashboard</a>
           <a href="/explore">Explore</a>
           <a href="/saved">Saved</a>
           <a href="/applied">Applied</a>

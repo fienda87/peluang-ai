@@ -209,6 +209,17 @@ async def process_document(
             url=source_page,
         )
 
+        from app.shared.eventbus import publish
+
+        publish(
+            "opp.created",
+            f"✨ PELUANG BARU [{data['category']}] {data['title'][:80]}"
+            + (f" — deadline {end_date}" if end_date else ""),
+            level="success",
+            title=data["title"],
+            category=data["category"],
+        )
+
         await session.execute(
             text("UPDATE raw_documents SET opportunity_id = :oid WHERE id = :did"),
             {"oid": opportunity_id, "did": doc_uuid},
@@ -239,6 +250,10 @@ async def process_document(
                     await dedup_svc.resolve_duplicate(
                         str(opportunity_id), dup_id, method, score
                     )
+                    publish(
+                        "dedup.resolved",
+                        f"♻️ Duplikat dilewati ({method}, skor {score})",
+                    )
                 else:
                     await dedup_svc.mark_canonical(str(opportunity_id))
             except Exception as e:
@@ -251,6 +266,18 @@ async def process_document(
             logger.warning("embed_skipped", opp=str(opportunity_id), error=str(e))
 
     await session.commit()
+
+    from app.shared.eventbus import publish
+
+    icon = {"valid": "⚡", "needs_recovery": "🛠"}.get(
+        final_state.status, "⚙️"
+    )
+    publish(
+        "extract.strategy",
+        f"{icon} Ekstraksi {strategy_db} · conf {final_state.confidence:.2f} · "
+        f"LLM {final_state.llm_call_count}x",
+        level="success" if final_state.status == "valid" else "warn",
+    )
 
     logger.info(
         "process_document_done",

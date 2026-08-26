@@ -81,3 +81,110 @@ UnicodeEncodeError: 'charmap' codec can't encode character '\u2192' in position 
 0 dokumen pending
 SELESAI: 0 opp baru, 0 valid-tanpa-opp, 0 invalid, 0 gagal
 ===== done ===== 
+===== 24/08/2026 19:35:35,27 ===== 
+Menjalankan crawl untuk 4 source...
+
+=== LPDP Kemenkeu ===
+HTTP Request: GET https://lpdp.kemenkeu.go.id/robots.txt "HTTP/1.1 404 Not Found"
+HTTP Request: GET https://lpdp.kemenkeu.go.id/ "HTTP/1.1 200 OK"
+{"source": "LPDP Kemenkeu", "links_total": 8, "skipped_already_crawled": 0, "method": "http", "event": "crawl_listing_done", "level": "info", "timestamp": "2026-08-24T11:36:17.667699Z"}
+HTTP Request: GET https://lpdp.kemenkeu.go.id/beasiswa/kebijakan-umum/ "HTTP/1.1 200 OK"
+HTTP Request: GET https://lpdp.kemenkeu.go.id/grantees/kisah-inspiratif-rispro/ "HTTP/1.1 200 OK"
+HTTP Request: GET https://lpdp.kemenkeu.go.id/riset/kebijakan-rispros-umum/ "HTTP/1.1 200 OK"
+HTTP Request: GET https://lpdp.kemenkeu.go.id/informasi/berita/kolaborasi-lpdp-dengan-brin-periset-baterai-nasional-agus-purwanto-raih-indonesia-innovator-award-2026 "HTTP/1.1 301 Moved Permanently"
+HTTP Request: GET https://lpdp.kemenkeu.go.id/informasi/berita/navigasi-biru-nusantara-mengawal-kedaulatan-maritim-lewat-hilirisasi-riset-di-rtb-vol-10 "HTTP/1.1 301 Moved Permanently"
+HTTP Request: GET https://lpdp.kemenkeu.go.id/informasi/berita/sapi-cepat-gemuk-peternak-cepat-panen-inovasi-periset-kupang-temukan-pakan-ajaib-berbasis-putak "HTTP/1.1 301 Moved Permanently"
+HTTP Request: GET https://lpdp.kemenkeu.go.id/informasi/berita/sosialisasi-beasiswa-lpdp-hadir-di-berbagai-pelosok-negeri-membuka-jalan-talenta-daerah-menuju-kampus-top-dunia "HTTP/1.1 301 Moved Permanently"
+HTTP Request: GET https://lpdp.kemenkeu.go.id/beasiswa/pendaftaran-beasiswa/ "HTTP/1.1 200 OK"
+HTTP Request: GET https://lpdp.kemenkeu.go.id/informasi/berita/sapi-cepat-gemuk-peternak-cepat-panen-inovasi-periset-kupang-temukan-pakan-ajaib-berbasis-putak/ "HTTP/1.1 200 OK"
+HTTP Request: GET https://lpdp.kemenkeu.go.id/informasi/berita/kolaborasi-lpdp-dengan-brin-periset-baterai-nasional-agus-purwanto-raih-indonesia-innovator-award-2026/ "HTTP/1.1 200 OK"
+HTTP Request: GET https://lpdp.kemenkeu.go.id/informasi/berita/navigasi-biru-nusantara-mengawal-kedaulatan-maritim-lewat-hilirisasi-riset-di-rtb-vol-10/ "HTTP/1.1 200 OK"
+HTTP Request: GET https://lpdp.kemenkeu.go.id/informasi/berita/sosialisasi-beasiswa-lpdp-hadir-di-berbagai-pelosok-negeri-membuka-jalan-talenta-daerah-menuju-kampus-top-dunia/ "HTTP/1.1 200 OK"
+{"checksum": "07fb1226633fc287", "event": "duplicate_document_skipped", "level": "info", "timestamp": "2026-08-24T11:36:26.186945Z"}
+{"checksum": "a506353d7472ddf9", "event": "duplicate_document_skipped", "level": "info", "timestamp": "2026-08-24T11:36:26.192755Z"}
+{"checksum": "73c0c6660773038c", "event": "duplicate_document_skipped", "level": "info", "timestamp": "2026-08-24T11:36:26.196788Z"}
+{"checksum": "b5a89bea334dc98a", "event": "duplicate_document_skipped", "level": "info", "timestamp": "2026-08-24T11:36:26.202079Z"}
+{"checksum": "cd054e1802c52b1e", "event": "duplicate_document_skipped", "level": "info", "timestamp": "2026-08-24T11:36:26.208149Z"}
+{"checksum": "a31b44ded3ada122", "event": "duplicate_document_skipped", "level": "info", "timestamp": "2026-08-24T11:36:26.213148Z"}
+{"checksum": "41e4ba8819f953ce", "event": "duplicate_document_skipped", "level": "info", "timestamp": "2026-08-24T11:36:26.217146Z"}
+{"checksum": "7835c4b86860ad8a", "event": "duplicate_document_skipped", "level": "info", "timestamp": "2026-08-24T11:36:26.222146Z"}
+{"source": "LPDP Kemenkeu", "pages": 9, "new_docs": 0, "event": "crawl_success", "level": "info", "timestamp": "2026-08-24T11:36:27.925223Z"}
+  crawl: ok, halaman=9, dok baru=0
+
+=== Djarum Beasiswa Plus ===
+HTTP Request: GET https://djarumbeasiswaplus.org/robots.txt "HTTP/1.1 200 OK"
+HTTP Request: GET https://djarumbeasiswaplus.org/ "HTTP/1.1 302 Found"
+HTTP Request: GET https://djarumbeasiswaplus.org/home "HTTP/1.1 200 OK"
+{"source": "Djarum Beasiswa Plus", "links_total": 1, "skipped_already_crawled": 10, "method": "http", "event": "crawl_listing_done", "level": "info", "timestamp": "2026-08-24T11:36:28.460712Z"}
+HTTP Request: GET https://djarumbeasiswaplus.org/our-program/program/ikatan-alumni "HTTP/1.1 302 Found"
+HTTP Request: GET https://djarumbeasiswaplus.org/our-program/program/networking "HTTP/1.1 200 OK"
+{"doc_id": "f7c81d97-5bc7-4642-b057-edd8266c87ec", "doc_type": "HTML", "size": 56011, "event": "raw_document_stored", "level": "info", "timestamp": "2026-08-24T11:36:29.580269Z"}
+{"source": "Djarum Beasiswa Plus", "pages": 2, "new_docs": 1, "event": "crawl_success", "level": "info", "timestamp": "2026-08-24T11:36:29.614418Z"}
+  crawl: ok, halaman=2, dok baru=1
+{"doc_type": "HTML", "text_len": 2293, "has_image": false, "event": "ex_agent_detect", "level": "info", "timestamp": "2026-08-24T11:36:50.396113Z"}
+{"provider": "openrouter", "event": "ai_provider_selected", "level": "info", "timestamp": "2026-08-24T11:36:50.515076Z"}
+HTTP Request: POST https://openrouter.ai/api/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+{"failed": "z-ai/glm-5.2:free", "code": "PROVIDER_RATE_LIMIT", "event": "model_fallback", "level": "warning", "timestamp": "2026-08-24T11:36:51.095279Z"}
+HTTP Request: POST https://openrouter.ai/api/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+{"failed": "google/gemma-4-31b-it:free", "code": "PROVIDER_RATE_LIMIT", "event": "model_fallback", "level": "warning", "timestamp": "2026-08-24T11:36:51.319832Z"}
+HTTP Request: POST https://openrouter.ai/api/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+{"failed": "nvidia/nemotron-3-super-120b-a12b:free", "code": "PROVIDER_RATE_LIMIT", "event": "model_fallback", "level": "warning", "timestamp": "2026-08-24T11:36:51.545005Z"}
+HTTP Request: POST https://openrouter.ai/api/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+{"failed": "nvidia/nemotron-nano-9b-v2:free", "code": "PROVIDER_RATE_LIMIT", "event": "model_fallback", "level": "warning", "timestamp": "2026-08-24T11:36:51.768200Z"}
+{"error": "PROVIDER_RATE_LIMIT", "event": "single_extraction_failed", "level": "error", "timestamp": "2026-08-24T11:36:51.768200Z"}
+{"strategy": "deterministic", "confidence": 0.41, "status": "invalid", "llm_calls": 1, "steps": 4, "event": "ex_agent_done", "level": "info", "timestamp": "2026-08-24T11:36:51.776196Z"}
+    EXCEPTION: 'ExtractionState' object has no attribute 'llm_call_count'
+
+=== Tanoto Foundation ===
+HTTP Request: GET https://www.tanotofoundation.org/robots.txt "HTTP/1.1 200 OK"
+HTTP Request: GET https://www.tanotofoundation.org/en/scholarship/ "HTTP/1.1 301 Moved Permanently"
+HTTP Request: GET http://www.tanotofoundation.org/scholarship/ "HTTP/1.1 301 Moved Permanently"
+HTTP Request: GET https://www.tanotofoundation.org/scholarship/ "HTTP/1.1 301 Moved Permanently"
+HTTP Request: GET https://www.tanotofoundation.org/scholarships-lets-get-tanoto-foundations/ "HTTP/1.1 200 OK"
+{"source": "Tanoto Foundation", "links_total": 6, "skipped_already_crawled": 2, "method": "http", "event": "crawl_listing_done", "level": "info", "timestamp": "2026-08-24T11:36:55.172255Z"}
+HTTP Request: GET https://www.tanotofoundation.org/en/scholarship/ "HTTP/1.1 301 Moved Permanently"
+HTTP Request: GET http://www.tanotofoundation.org/scholarship/ "HTTP/1.1 301 Moved Permanently"
+HTTP Request: GET https://www.tanotofoundation.org/scholarships-lets-get-tanoto-foundations/feed/ "HTTP/1.1 200 OK"
+HTTP Request: GET https://www.tanotofoundation.org/scholarship/ "HTTP/1.1 301 Moved Permanently"
+HTTP Request: GET https://www.tanotofoundation.org/scholarships-lets-get-tanoto-foundations/ "HTTP/1.1 200 OK"
+HTTP Request: GET https://www.tanotofoundation.org/initiative/professorship-program/ "HTTP/1.1 200 OK"
+HTTP Request: GET https://www.tanotofoundation.org/initiative/tanoto-foundation-fellowship-program/ "HTTP/1.1 200 OK"
+HTTP Request: GET https://www.tanotofoundation.org/initiative/research-initiatives/ "HTTP/1.1 200 OK"
+HTTP Request: GET https://www.tanotofoundation.org/scholarships-lets-get-tanoto-foundations/ "HTTP/1.1 200 OK"
+{"doc_id": "055e52b7-1c9e-48c0-ba87-20c7f85fab5c", "doc_type": "HTML", "size": 157379, "event": "raw_document_stored", "level": "info", "timestamp": "2026-08-24T11:37:03.724780Z"}
+{"checksum": "dba803a76546ae30", "event": "duplicate_document_skipped", "level": "info", "timestamp": "2026-08-24T11:37:03.861667Z"}
+{"checksum": "21095fde97aeaa82", "event": "duplicate_document_skipped", "level": "info", "timestamp": "2026-08-24T11:37:03.943529Z"}
+{"checksum": "b870b60ba4c50c11", "event": "duplicate_document_skipped", "level": "info", "timestamp": "2026-08-24T11:37:03.957946Z"}
+{"checksum": "6b5fbed6cd3b393c", "event": "duplicate_document_skipped", "level": "info", "timestamp": "2026-08-24T11:37:04.031603Z"}
+{"checksum": "65f7a1697c658bed", "event": "duplicate_document_skipped", "level": "info", "timestamp": "2026-08-24T11:37:04.104657Z"}
+{"source": "Tanoto Foundation", "pages": 7, "new_docs": 1, "event": "crawl_success", "level": "info", "timestamp": "2026-08-24T11:37:04.524639Z"}
+  crawl: ok, halaman=7, dok baru=1
+{"doc_type": "HTML", "text_len": 5392, "has_image": false, "event": "ex_agent_detect", "level": "info", "timestamp": "2026-08-24T11:37:19.301797Z"}
+HTTP Request: POST https://openrouter.ai/api/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+{"failed": "z-ai/glm-5.2:free", "code": "PROVIDER_RATE_LIMIT", "event": "model_fallback", "level": "warning", "timestamp": "2026-08-24T11:37:19.654749Z"}
+HTTP Request: POST https://openrouter.ai/api/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+{"failed": "google/gemma-4-31b-it:free", "code": "PROVIDER_RATE_LIMIT", "event": "model_fallback", "level": "warning", "timestamp": "2026-08-24T11:37:19.966483Z"}
+HTTP Request: POST https://openrouter.ai/api/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+{"failed": "nvidia/nemotron-3-super-120b-a12b:free", "code": "PROVIDER_RATE_LIMIT", "event": "model_fallback", "level": "warning", "timestamp": "2026-08-24T11:37:20.182450Z"}
+HTTP Request: POST https://openrouter.ai/api/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+{"failed": "nvidia/nemotron-nano-9b-v2:free", "code": "PROVIDER_RATE_LIMIT", "event": "model_fallback", "level": "warning", "timestamp": "2026-08-24T11:37:20.422327Z"}
+{"error": "PROVIDER_RATE_LIMIT", "event": "single_extraction_failed", "level": "error", "timestamp": "2026-08-24T11:37:20.425452Z"}
+{"strategy": "deterministic", "confidence": 0.41, "status": "invalid", "llm_calls": 1, "steps": 4, "event": "ex_agent_done", "level": "info", "timestamp": "2026-08-24T11:37:20.430458Z"}
+    EXCEPTION: 'ExtractionState' object has no attribute 'llm_call_count'
+
+=== Beasiswa Indo (aggregator) ===
+HTTP Request: GET https://beasiswaindo.com/robots.txt "HTTP/1.1 403 Forbidden"
+HTTP Request: GET https://beasiswaindo.com/ "HTTP/1.1 200 OK"
+{"source": "Beasiswa Indo (aggregator)", "links_total": 1, "skipped_already_crawled": 1, "method": "http", "event": "crawl_listing_done", "level": "info", "timestamp": "2026-08-24T11:37:22.568630Z"}
+HTTP Request: GET https://beasiswaindo.com/cybercoral "HTTP/1.1 301 Moved Permanently"
+HTTP Request: GET https://my.cybercoral.com/aff.php?aff=1 "HTTP/1.1 301 Moved Permanently"
+HTTP Request: GET https://www.cybercoral.com "HTTP/1.1 200 OK"
+{"checksum": "806490cbb5c91dd6", "event": "duplicate_document_skipped", "level": "info", "timestamp": "2026-08-24T11:37:26.891332Z"}
+{"source": "Beasiswa Indo (aggregator)", "pages": 2, "new_docs": 0, "event": "crawl_success", "level": "info", "timestamp": "2026-08-24T11:37:26.934250Z"}
+  crawl: ok, halaman=2, dok baru=0
+
+========================================
+SELESAI: 2 dokumen baru, 0 opportunity dibuat, 2 error
+0 dokumen pending
+SELESAI: 0 opp baru, 0 valid-tanpa-opp, 0 invalid, 0 gagal
+===== done ===== 

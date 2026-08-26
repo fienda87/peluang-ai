@@ -11,6 +11,7 @@ from app.infrastructure.storage import StorageBackend
 from app.modules.ingestion.health_service import SourceHealthService
 from app.modules.ingestion.html_adapter import HTMLFetcher
 from app.modules.ingestion.service import IngestionService
+from app.shared.eventbus import publish
 from app.shared.logging import get_logger
 
 logger = get_logger("ingestion.pipeline")
@@ -191,6 +192,13 @@ class CrawlPipeline:
         pages_found = 0
         new_doc_ids: list[str] = []
 
+
+        publish(
+            "crawl.started",
+            f"🔍 Mulai crawling {source['name']} ({source['url']})",
+            source=source["name"],
+        )
+
         try:
             if source["access_method"] == "rss":
                 listing = None
@@ -212,6 +220,13 @@ class CrawlPipeline:
 
             pages_found += 1 + len(detail_urls)
 
+
+            publish(
+                "crawl.listing",
+                f"📄 {source['name']}: {len(detail_urls)} link baru · "
+                f"{skipped} sudah ada · {len(links)} total",
+                source=source["name"],
+            )
             logger.info(
                 "crawl_listing_done",
                 source=source["name"],
@@ -222,7 +237,15 @@ class CrawlPipeline:
 
             results = await self.fetcher.fetch_many(detail_urls)
 
-            for res in results:
+
+            total = len(results)
+            for i, res in enumerate(results, 1):
+                if res.success and res.content:
+                    publish(
+                        "crawl.page",
+                        f"⬇ Mengambil {i}/{total}: {urlparse(res.url).path or '/'}",
+                        source=source["name"],
+                    )
                 if not res.success or not res.content:
                     continue
                 doc_type = "HTML"
@@ -236,6 +259,11 @@ class CrawlPipeline:
                 )
                 if doc_id:
                     new_doc_ids.append(str(doc_id))
+                    publish(
+                        "crawl.stored",
+                        f"💾 Dokumen tersimpan ({len(res.content) // 1024} KB)",
+                        source=source["name"],
+                    )
 
             await self.ingestion.finish_run(
                 run_id=run_id,
@@ -246,6 +274,13 @@ class CrawlPipeline:
             await self.ingestion.update_source_health(source_id, "healthy", consecutive_errors=0)
             await self.session.commit()
 
+            publish(
+                "run.summary",
+                f"✅ {source['name']} selesai: {pages_found} halaman · "
+                f"{len(new_doc_ids)} dokumen baru",
+                level="success",
+                source=source["name"],
+            )
             logger.info(
                 "crawl_success",
                 source=source["name"],
@@ -260,6 +295,12 @@ class CrawlPipeline:
             }
 
         except Exception as e:
+
+            publish(
+                "pipeline.error",
+                f"⚠️ {source['name']} gagal: {str(e)[:120]}",
+                level="error",
+            )
             try:
                 health = await self.health.record_error(source_id)
             except Exception:
