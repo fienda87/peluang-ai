@@ -9,18 +9,19 @@ from app.shared.logging import get_logger
 
 logger = get_logger("ai.ollama")
 
-OLLAMA_CHAT_MODEL = "llama3.1:8b"
 OLLAMA_EMBEDDING_MODEL = "nomic-embed-text"
 
 
 class OllamaAdapter(AIPort):
     def __init__(self) -> None:
-        self.base_url = get_settings().ollama_base_url
+        s = get_settings()
+        self.base_url = s.ollama_base_url
+        self.chat_model = s.ai_chat_model
 
     def get_model(self, purpose: str = "chat") -> str:
         if purpose == "embedding":
             return OLLAMA_EMBEDDING_MODEL
-        return OLLAMA_CHAT_MODEL
+        return self.chat_model
 
     async def chat(
         self,
@@ -29,7 +30,7 @@ class OllamaAdapter(AIPort):
         temperature: float = 0.0,
         max_tokens: int = 2048,
     ) -> AIResponse:
-        model = model_key or OLLAMA_CHAT_MODEL
+        model = model_key or self.chat_model
         payload = {
             "model": model,
             "messages": messages,
