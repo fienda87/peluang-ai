@@ -267,6 +267,10 @@ async def process_document(
 
     await session.commit()
 
+    # §17 Contract: needs_recovery → auto-enqueue Recovery Agent (worker path)
+    if final_state.status == "needs_recovery" and redis is not None:
+        await redis.enqueue_job("recover_pending_task", 50)
+
     from app.shared.eventbus import publish
 
     icon = {"valid": "⚡", "needs_recovery": "🛠"}.get(
