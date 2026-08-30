@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import Sidebar from "../components/Sidebar";
 
 export const metadata: Metadata = {
   title: "Peluang.ai",
@@ -9,7 +10,12 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="id">
-      <body>{children}</body>
+      <body>
+        <div className="app-frame">
+          <Sidebar />
+          <main className="app-main">{children}</main>
+        </div>
+      </body>
     </html>
   );
 }
