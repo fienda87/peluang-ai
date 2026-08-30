@@ -1,4 +1,5 @@
 import uuid
+from datetime import timedelta
 
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -16,7 +17,7 @@ async def telegram_link(
     session: AsyncSession = Depends(get_session),
 ):
     """JWT pendek sebagai deep-link token untuk /start <token> di bot."""
-    token = AuthService.create_access_token(str(user_id), expires_minutes=30)
+    token = AuthService.create_access_token(str(user_id), expires_delta=timedelta(minutes=30))
     return {
         "token": token,
         "url": f"https://t.me/peluang_ai_bot?start={token}",
