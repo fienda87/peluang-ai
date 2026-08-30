@@ -192,8 +192,10 @@ async def node_try_llm(state: ExtractionState) -> ExtractionState:
     if result:
         # P1: hasil LLM hanya melengkapi field kosong dari deterministic
         if state.det_result is not None:
-            base = state.det_result.model_dump()
-            for k, v in result.to_dict().items():
+            from dataclasses import asdict
+
+            base = asdict(state.det_result)
+            for k, v in asdict(result).items():
                 if k == "field_confidence":
                     continue
                 if base.get(k) in (None, "") and v not in (None, ""):

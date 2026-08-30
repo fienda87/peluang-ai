@@ -1,5 +1,6 @@
 from functools import lru_cache
 
+from app.modules.ai.hybrid import HybridAIAdapter
 from app.modules.ai.ollama import OllamaAdapter
 from app.modules.ai.openrouter import OpenRouterAdapter
 from app.modules.ai.ports import AIPort, AIProviderError, AIResponse, EmbeddingResponse
@@ -17,5 +18,8 @@ def get_ai() -> AIPort:
     if provider == "ollama":
         logger.info("ai_provider_selected", provider="ollama")
         return OllamaAdapter()
+    if provider == "auto":
+        logger.info("ai_provider_selected", provider="hybrid-api-first")
+        return HybridAIAdapter()
     logger.info("ai_provider_selected", provider="openrouter")
     return OpenRouterAdapter()

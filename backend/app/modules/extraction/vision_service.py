@@ -1,3 +1,5 @@
+import base64
+
 from app.modules.ai import AIPort, AIProviderError
 from app.modules.extraction.schema import ExtractionSchema
 from app.shared.logging import get_logger
@@ -22,6 +24,8 @@ class VisionExtractionService:
         )
 
         try:
+            # Vision selalu route ke model VL via purpose key
+            vision_model = self.ai.get_model("vision")
             response = await self.ai.chat(
                 messages=[
                     {
@@ -33,7 +37,7 @@ class VisionExtractionService:
                                 "source": {
                                     "type": "base64",
                                     "media_type": "image/jpeg",
-                                    "data": __import__("base64").b64encode(image_bytes).decode(),
+                                    "data": base64.b64encode(image_bytes).decode(),
                                 },
                             },
                         ],
@@ -41,6 +45,7 @@ class VisionExtractionService:
                 ],
                 temperature=0.0,
                 max_tokens=1000,
+                model_key=vision_model,
             )
         except AIProviderError as e:
             logger.error("vision_extraction_failed", error=e.code)

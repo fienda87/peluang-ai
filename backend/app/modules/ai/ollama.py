@@ -10,13 +10,17 @@ from app.shared.logging import get_logger
 logger = get_logger("ai.ollama")
 
 OLLAMA_EMBEDDING_MODEL = "nomic-embed-text"
+OLLAMA_FALLBACK_CHAT = "llama3.2:3b"  # model lokal default (slug API tidak berlaku di Ollama)
 
 
 class OllamaAdapter(AIPort):
     def __init__(self) -> None:
         s = get_settings()
         self.base_url = s.ollama_base_url
-        self.chat_model = s.ai_chat_model
+        # slug OpenRouter (mengandung "/") tidak valid di Ollama → fallback model lokal
+        self.chat_model = (
+            s.ai_chat_model if "/" not in s.ai_chat_model else OLLAMA_FALLBACK_CHAT
+        )
 
     def get_model(self, purpose: str = "chat") -> str:
         if purpose == "embedding":
