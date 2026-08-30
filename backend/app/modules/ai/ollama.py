@@ -31,11 +31,17 @@ class OllamaAdapter(AIPort):
         max_tokens: int = 2048,
     ) -> AIResponse:
         model = model_key or self.chat_model
+        s = get_settings()
         payload = {
             "model": model,
             "messages": messages,
             "stream": False,
-            "options": {"temperature": temperature, "num_predict": max_tokens},
+            "keep_alive": s.ollama_keep_alive,
+            "options": {
+                "temperature": temperature,
+                "num_predict": max_tokens,
+                "num_ctx": 2048,
+            },
         }
         data = await self._post("/api/chat", payload)
         return AIResponse(

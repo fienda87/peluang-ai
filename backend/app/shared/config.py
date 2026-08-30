@@ -26,6 +26,8 @@ class Settings(BaseSettings):
     openrouter_api_key: str = ""
     openrouter_base_url: str = "https://openrouter.ai/api/v1"
     ollama_base_url: str = "http://localhost:11434"
+    ollama_num_parallel: int = 1
+    ollama_keep_alive: str = "-1"
 
     ai_provider: str = Field(default="openrouter", description="openrouter | ollama")
     ai_chat_model: str = "meta-llama/llama-3.1-8b-instruct:free"

@@ -20,6 +20,26 @@ MAX_DETAIL_PAGES = 25
 
 ASSET_EXT_RE = None  # compiled lazily
 URL_KEYWORD_RE = None  # compiled lazily
+NAV_JUNK_RE = None  # compiled lazily
+
+
+def _nav_junk_filter():
+    global NAV_JUNK_RE
+    if NAV_JUNK_RE is None:
+        import re
+
+        NAV_JUNK_RE = re.compile(
+            r"/(about|tentang|contact|kontak|hubungi|faq|privacy|kebijakan|terms"
+            r"|syarat|prasyarat|login|daftar|register|team|direktor(i|ium)"
+            r"|kata-mereka|alumni|ikatan|mitra|persyaratan|program-kami"
+            r"|soft-skills|competition|challenges|berita|news|category|tag"
+            r"|author|page/\d+|feed|peta-situs|sitemap|live|kinerja(-\w+)?"
+            r"|investasi|dana-abadi|informasi-publik|manifest|awardee|grantees"
+            r"|kisah|en(/|$)|kebijakan(-\w+)*|rispros|kontribusi|cso|networking"
+            r"|our-program|pendaftaran-beasiswa(/|$)|hubungi-kami)(?![\w-])",
+            re.I,
+        )
+    return NAV_JUNK_RE
 
 
 def _asset_filter():
@@ -87,6 +107,7 @@ class CrawlPipeline:
         base_domain = urlparse(listing_url).netloc.removeprefix("www.")
         kw = _keyword_filter()
         assets = _asset_filter()
+        navjunk = _nav_junk_filter()
 
         seen: set[str] = set()
 
@@ -101,6 +122,8 @@ class CrawlPipeline:
             if assets.search(path):
                 return False
             if not path or path == "/":
+                return False
+            if navjunk.search(path):
                 return False
             return True
 

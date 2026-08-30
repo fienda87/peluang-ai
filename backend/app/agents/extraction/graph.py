@@ -10,7 +10,7 @@ from langgraph.graph import END, StateGraph
 from pydantic import BaseModel
 
 from app.modules.ai import get_ai
-from app.modules.extraction.deterministic import DeterministicExtractor
+from app.modules.extraction.deterministic import DEADLINE_KEYWORDS, DeterministicExtractor
 from app.modules.extraction.llm_service import LLMExtractionService
 from app.modules.extraction.schema import ExtractionSchema
 from app.modules.extraction.validation import ValidationService
@@ -90,10 +90,31 @@ async def node_detect(state: ExtractionState) -> ExtractionState:
     return state
 
 
+def _has_any_date(text: str) -> bool:
+    """Pre-screen (Runtime §12): tanpa pola tanggal apa pun -> jangan buang resource LLM."""
+    import re
+
+    patterns = [
+        r"\d{1,2}\s+(januari|februari|maret|april|mei|juni|juli|agustus|september|oktober|november|desember)",
+        r"\d{1,2}[/\-]\d{1,2}[/\-]\d{2,4}",
+        r"\d{4}[-/]\d{1,2}[-/]\d{1,2}",
+    ]
+    return any(re.search(p, text, re.I) for p in patterns)
+
+
 async def node_try_deterministic(state: ExtractionState) -> ExtractionState:
     state.steps += 1
     if not state.text or len(state.text.strip()) < 40:
         state.status = "needs_llm"
+        return state
+
+    # P0: dokumen tanpa jejak tanggal sama sekali -> terminal, hemat LLM (Runtime §12)
+    if not _has_any_date(state.text):
+        state.status = "failed"
+        state.error = "NO_CONTENT_FOUND"
+        state.strategy_used = Strategy.DETERMINISTIC
+        state.det_result = _det_to_schema(DeterministicExtractor().extract_text(state.text)) if len(state.text) >= 100 else None
+        logger.info("ex_agent_prescreen_skip", text_len=len(state.text))
         return state
 
     det = DeterministicExtractor()
@@ -136,20 +157,55 @@ async def node_try_llm(state: ExtractionState) -> ExtractionState:
         return state
 
     state.llm_calls += 1
+
+    # P1 (Runtime §3): prompt ringkas — hanya cari field yang deterministic lewatkan
+    import json
+    import re
+
+    from app.modules.extraction.schema import EXTRACTION_PROMPT_TEMPLATE
+
+    if state.det_result is not None and (state.det_result.title or state.det_result.category):
+        lines = [
+            ln
+            for ln in state.text.split(". ")
+            if any(re.search(k, ln, re.I) for k in DEADLINE_KEYWORDS)
+            or re.search(r"\d{1,2}\s+\w+\s+\d{4}|\d{1,2}[/\-]\d{1,2}[/\-]\d{2,4}", ln)
+        ]
+        snippet = " ".join(lines)[:800] if lines else state.text[:600]
+        det_dict = state.det_result.to_dict()
+        prompt = (
+            "Konteks hasil ekstraksi parser (field kosong perlu dilengkapi):\n"
+            f"{json.dumps(det_dict, ensure_ascii=False, default=str)}\n\n"
+            "Cari DEADLINE peluang dari cuplikan teks berikut. "
+            'Jawab HANYA JSON: {"end_date": "YYYY-MM-DD" atau null, '
+            '"organizer": "string atau null", "location": "string atau null"}\n\n'
+            f"Teks:\n{snippet}"
+        )
+        max_tok = 400
+    else:
+        prompt = EXTRACTION_PROMPT_TEMPLATE.format(text=state.text[:2000])
+        max_tok = 1200
+
     llm = LLMExtractionService(get_ai())
-    result = await llm.extract_single(state.text)
+    result = await llm.extract_single(prompt, max_tokens=max_tok, raw_prompt=True)
 
     if result:
-        llm_conf = _conf_of(result)
-        det_conf = _conf_of(state.det_result)
-        if llm_conf >= det_conf:
-            state.final_result = result
-            state.confidence = llm_conf
+        # P1: hasil LLM hanya melengkapi field kosong dari deterministic
+        if state.det_result is not None:
+            base = state.det_result.model_dump()
+            for k, v in result.to_dict().items():
+                if k == "field_confidence":
+                    continue
+                if base.get(k) in (None, "") and v not in (None, ""):
+                    base[k] = v
+            merged = ExtractionSchema(**base)
+            state.final_result = merged
+            state.confidence = _conf_of(merged)
             state.strategy_used = Strategy.LLM
         else:
-            state.final_result = state.det_result
-            state.confidence = det_conf
-            state.strategy_used = Strategy.DETERMINISTIC
+            state.final_result = result
+            state.confidence = _conf_of(result)
+            state.strategy_used = Strategy.LLM
         state.status = "valid"
     elif state.det_result is not None:
         state.final_result = state.det_result

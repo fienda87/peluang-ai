@@ -62,13 +62,18 @@ class LLMExtractionService:
             logger.error("batch_extraction_json_error", error=str(e))
             return [None] * len(texts)
 
-    async def extract_single(self, text: str) -> ExtractionSchema | None:
-        prompt = EXTRACTION_PROMPT_TEMPLATE.format(text=text[:3000])
+    async def extract_single(
+        self, text: str, max_tokens: int = 2500, raw_prompt: bool = False
+    ) -> ExtractionSchema | None:
+        if raw_prompt:
+            prompt = text
+        else:
+            prompt = EXTRACTION_PROMPT_TEMPLATE.format(text=text[:3000])
         try:
             response = await self.ai.chat(
                 messages=[{"role": "user", "content": prompt}],
                 temperature=0.0,
-                max_tokens=2500,
+                max_tokens=max_tokens,
             )
         except AIProviderError as e:
             logger.error("single_extraction_failed", error=e.code)
