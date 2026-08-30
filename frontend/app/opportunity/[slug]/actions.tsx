@@ -9,26 +9,17 @@ export default function OpportunityActions({ slug }: { slug: string }) {
   const [busy, setBusy] = useState(false);
 
   async function act(eventType: "save" | "apply") {
-    const token = localStorage.getItem("peluang_token");
-    if (!token) {
-      window.location.href = "/login";
-      return;
-    }
     setBusy(true);
     try {
-      // cari id opportunity by slug lalu kirim event
       const search = await fetch(
-        `http://localhost:8000/opportunities?q=${encodeURIComponent(slug)}&limit=5`
+        `${API}/opportunities?q=${encodeURIComponent(slug)}&limit=5`
       ).then((r) => r.json());
       const opp = search.find((o: { slug: string }) => o.slug === slug);
       if (!opp) throw new Error("not found");
 
       await fetch(`${API}/events`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           event_type: eventType,
           opportunity_id: opp.id,
@@ -36,7 +27,7 @@ export default function OpportunityActions({ slug }: { slug: string }) {
       });
       setStatus(eventType === "save" ? "Tersimpan ✓" : "Tercatat sebagai dilamar ✓");
     } catch {
-      setStatus("Gagal — coba login ulang.");
+      setStatus("Gagal — coba lagi.");
     } finally {
       setBusy(false);
     }
@@ -55,7 +46,14 @@ export default function OpportunityActions({ slug }: { slug: string }) {
         Tandai Dilamar
       </button>
       {status && (
-        <span style={{ alignSelf: "center", fontSize: 13.5, color: "var(--accent)", fontWeight: 600 }}>
+        <span
+          style={{
+            alignSelf: "center",
+            fontSize: 13.5,
+            color: "var(--accent)",
+            fontWeight: 600,
+          }}
+        >
           {status}
         </span>
       )}

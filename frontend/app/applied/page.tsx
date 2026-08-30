@@ -1,30 +1,26 @@
-"use client";
-
-import { useEffect, useState } from "react";
-import Link from "next/link";
-import { api, getToken } from "../../lib/auth";
-
 type Item = {
   id: string;
   title: string;
   slug: string;
   category: string;
+  organizer?: string;
   end_date?: string;
 };
 
-export default function AppliedPage() {
-  const [items, setItems] = useState<Item[] | null>(null);
-  const [authed, setAuthed] = useState(true);
+async function getApplied(): Promise<Item[]> {
+  try {
+    const res = await fetch("http://localhost:8000/profile/applied", {
+      cache: "no-store",
+    });
+    if (!res.ok) return [];
+    return await res.json();
+  } catch {
+    return [];
+  }
+}
 
-  useEffect(() => {
-    if (!getToken()) {
-      setAuthed(false);
-      return;
-    }
-    api<Item[]>("/profile/applied")
-      .then(setItems)
-      .catch(() => setAuthed(false));
-  }, []);
+export default async function AppliedPage() {
+  const items = await getApplied();
 
   return (
     <main className="page-shell">
@@ -32,26 +28,12 @@ export default function AppliedPage() {
       <h1>Lamaran kamu</h1>
       <p className="page-sub">Status setiap peluang yang sudah kamu daftari.</p>
 
-      {!authed && (
-        <div className="empty-state">
-          <h3>Belum login.</h3>
-          <p>
-            <Link href="/login" style={{ color: "var(--accent)", fontWeight: 700 }}>
-              Masuk dulu
-            </Link>{" "}
-            untuk melacak lamaran.
-          </p>
-        </div>
-      )}
-
-      {authed && items && items.length === 0 && (
+      {items.length === 0 ? (
         <div className="empty-state">
           <h3>Belum ada lamaran.</h3>
-          <p>Tekan &ldquo;Tandai Dilamar&rdquo; di halaman peluang.</p>
+          <p>Tekan &ldquo;Tandai Dilamar&rdquo; di halaman peluang untuk mulai melacak.</p>
         </div>
-      )}
-
-      {items && items.length > 0 && (
+      ) : (
         <div className="opportunity-list">
           {items.map((item) => (
             <article key={item.id} className="feed-card">
@@ -60,8 +42,9 @@ export default function AppliedPage() {
                 <span className="deadline-chip">{item.end_date ?? "-"}</span>
               </div>
               <h3>
-                <Link href={`/opportunity/${item.slug}`}>{item.title}</Link>
+                <a href={`/opportunity/${item.slug}`}>{item.title}</a>
               </h3>
+              <p>{item.organizer ?? "Penyelenggara belum tercatat"}</p>
             </article>
           ))}
         </div>

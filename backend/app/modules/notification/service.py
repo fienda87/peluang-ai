@@ -64,24 +64,60 @@ class NotificationService:
     async def dispatch_due(self, limit: int = 100) -> int:
         result = await self.session.execute(
             text(
-                "SELECT id, user_id, notification_type, payload FROM notifications "
-                "WHERE status = 'scheduled' AND scheduled_at <= now() "
-                "ORDER BY scheduled_at ASC LIMIT :limit"
+                "SELECT n.id, n.user_id, n.notification_type, CAST(n.payload AS text), "
+                "u.telegram_id, o.title, o.slug, o.end_date, o.category "
+                "FROM notifications n "
+                "JOIN users u ON u.id = n.user_id "
+                "LEFT JOIN opportunities o ON o.id = n.opportunity_id "
+                "WHERE n.status = 'scheduled' AND n.scheduled_at <= now() "
+                "ORDER BY n.scheduled_at ASC LIMIT :limit"
             ),
             {"limit": limit},
         )
         rows = result.fetchall()
         sent = 0
 
-        for notif_id, user_id, ntype, payload in rows:
+        from app.modules.notification.telegram_client import TelegramClient
+
+        tg = TelegramClient()
+
+        for notif_id, user_id, ntype, payload, telegram_id, title, slug, end_date, category in rows:
+            ok = False
+            if telegram_id:
+                days = None
+                if ntype == "deadline_d3":
+                    days = 3
+                elif ntype == "deadline_d1":
+                    days = 1
+
+                if days:
+                    msg = (
+                        f"⏰ <b>{title[:70]}</b>\n"
+                        f"Deadline {days} hari lagi ({end_date}).\n"
+                        f"[{category}] — jangan sampai terlewat!"
+                    )
+                else:
+                    msg = f"📌 Update peluang: <b>{str(title)[:70] if title else 'digest'}</b>"
+
+                ok = await tg.send(int(telegram_id), msg)
+
+            new_status = "sent" if ok else "failed"
             await self.session.execute(
                 text(
-                    "UPDATE notifications SET status = 'sent', sent_at = now() WHERE id = :id"
+                    "UPDATE notifications SET status = :st, sent_at = CASE WHEN :st = 'sent' "
+                    "THEN now() ELSE sent_at END, error_message = :err WHERE id = :id"
                 ),
-                {"id": notif_id},
+                {
+                    "st": new_status,
+                    "err": None if ok else "no_telegram_id_or_send_failed",
+                    "id": notif_id,
+                },
             )
-            sent += 1
-            logger.info("notification_sent", notif_id=str(notif_id), type=ntype)
+            if ok:
+                sent += 1
+                logger.info("notification_sent", notif_id=str(notif_id), type=ntype, via="telegram")
+            else:
+                logger.warning("notification_failed", notif_id=str(notif_id), type=ntype)
 
         await self.session.commit()
         return sent

@@ -1,21 +1,16 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
-import { api, getToken } from "../../lib/auth";
 
 export default function SettingsPage() {
   const [auto, setAuto] = useState(true);
   const [running, setRunning] = useState(false);
   const [msg, setMsg] = useState("");
-  const [authed, setAuthed] = useState(true);
+
+  const API = "http://localhost:8000";
 
   useEffect(() => {
-    if (!getToken()) {
-      setAuthed(false);
-      return;
-    }
-    fetch("http://localhost:8000/admin/pipeline/schedule")
+    fetch(`${API}/admin/pipeline/schedule`)
       .then((r) => r.json())
       .then((d) => setAuto(d.auto_daily))
       .catch(() => {});
@@ -24,11 +19,11 @@ export default function SettingsPage() {
   async function toggleAuto() {
     const next = !auto;
     setAuto(next);
-    await fetch("http://localhost:8000/admin/pipeline/schedule", {
+    await fetch(`${API}/admin/pipeline/schedule`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ enable: next }),
-    });
+    }).catch(() => {});
     setMsg(next ? "Auto harian: ON (07:00)" : "Auto harian: OFF");
   }
 
@@ -36,29 +31,13 @@ export default function SettingsPage() {
     setRunning(true);
     setMsg("");
     try {
-      await api("/admin/pipeline/run-now", { method: "POST" });
+      await fetch(`${API}/admin/pipeline/run-now`, { method: "POST" });
       setMsg("Pipeline jalan di background — cek hasil beberapa menit lagi.");
     } catch {
       setMsg("Gagal menjalankan.");
     } finally {
       setRunning(false);
     }
-  }
-
-  if (!authed) {
-    return (
-      <main className="page-shell">
-        <div className="empty-state">
-          <h3>Belum login.</h3>
-          <p>
-            <Link href="/login" style={{ color: "var(--accent)", fontWeight: 700 }}>
-              Masuk dulu
-            </Link>
-            .
-          </p>
-        </div>
-      </main>
-    );
   }
 
   return (
@@ -70,8 +49,8 @@ export default function SettingsPage() {
       <div className="simple-card">
         <h2 style={{ fontSize: 17, marginBottom: 8 }}>Pipeline data</h2>
         <p style={{ color: "var(--muted)", fontSize: 14, marginBottom: 16 }}>
-          Crawl sumber + ekstraksi LLM. Dokumen lama otomatis dilewati — hanya
-          peluang baru yang diproses.
+          Crawl sumber + ekstraksi LLM lokal. Dokumen lama otomatis dilewati —
+          hanya peluang baru yang diproses.
         </p>
 
         <div
@@ -86,8 +65,8 @@ export default function SettingsPage() {
         >
           <div>
             <strong style={{ fontSize: 14.5 }}>Jalankan otomatis tiap hari</strong>
-            <p className="muted" style={{ fontSize: 13 }}>
-              Setiap 07:00 pagi (setelah reset kuota LLM)
+            <p style={{ fontSize: 13, color: "var(--muted)" }}>
+              Setiap 07:00 pagi
             </p>
           </div>
           <button
@@ -97,8 +76,8 @@ export default function SettingsPage() {
               height: 32,
               borderRadius: 999,
               border: "1px solid var(--line)",
-              background: auto ? "var(--accent)" : "#e5e5e0",
-              color: auto ? "#fff" : "var(--muted)",
+              background: auto ? "var(--accent)" : "#1c2530",
+              color: auto ? "#06222b" : "var(--muted)",
               fontWeight: 700,
               cursor: "pointer",
             }}
@@ -119,8 +98,8 @@ export default function SettingsPage() {
         >
           <div>
             <strong style={{ fontSize: 14.5 }}>Jalankan sekarang</strong>
-            <p className="muted" style={{ fontSize: 13 }}>
-              Crawl + ekstraksi manual kapan pun mau
+            <p style={{ fontSize: 13, color: "var(--muted)" }}>
+              Crawl + ekstraksi manual kapan pun
             </p>
           </div>
           <button className="primary-button" onClick={runNow} disabled={running}>

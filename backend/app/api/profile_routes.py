@@ -6,6 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_current_user_id
 from app.infrastructure.database import get_session
+from app.modules.embedding.service import EmbeddingService
 from app.modules.identity.service import IdentityService
 
 router = APIRouter(prefix="/profile", tags=["profile"])
@@ -39,7 +40,17 @@ async def update_profile(
     session: AsyncSession = Depends(get_session),
 ):
     data = {k: v for k, v in req.model_dump().items() if v is not None}
-    return await IdentityService(session).update_profile(user_id, **data)
+    result = await IdentityService(session).update_profile(user_id, **data)
+    await session.commit()
+
+    # #2 loop personalisasi: re-embed profil setelah update
+    try:
+        await EmbeddingService(session).embed_user_profile(user_id)
+        await session.commit()
+    except Exception:
+        pass
+
+    return result
 
 
 @router.get("/saved")

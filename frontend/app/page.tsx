@@ -1,5 +1,6 @@
-type Opportunity = {
-  id: string;
+type FeedItem = {
+  id?: string;
+  opportunity_id?: string;
   title: string;
   slug: string;
   category: string;
@@ -7,13 +8,29 @@ type Opportunity = {
   location?: string;
   end_date?: string;
   prize?: string;
+  score?: number;
 };
 
-async function getOpportunities(): Promise<Opportunity[]> {
+async function getFeed(): Promise<FeedItem[]> {
   try {
-    const res = await fetch("http://localhost:8000/opportunities?limit=12", { cache: "no-store" });
-    if (!res.ok) return [];
-    return await res.json();
+    // Single-user mode: rekomendasi personal tanpa login
+    const res = await fetch("http://localhost:8000/recommendations?limit=6", {
+      cache: "no-store",
+    });
+    if (res.ok) {
+      const recs = await res.json();
+      if (recs.length > 0) return recs;
+    }
+    // fallback: semua opportunity aktif
+    const res2 = await fetch("http://localhost:8000/opportunities?limit=6", {
+      cache: "no-store",
+    });
+    if (!res2.ok) return [];
+    const opps = await res2.json();
+    return (opps as FeedItem[]).map((o) => ({
+      ...o,
+      opportunity_id: o.opportunity_id ?? o.id,
+    }));
   } catch {
     return [];
   }
@@ -49,7 +66,7 @@ function formatShort(iso?: string) {
 }
 
 export default async function HomePage() {
-  const opportunities = await getOpportunities();
+  const opportunities = await getFeed();
   const featured = opportunities.slice(0, 6);
   const activeCount = opportunities.length;
   const categoryCount = new Set(opportunities.map((item) => item.category)).size;
@@ -132,7 +149,10 @@ export default async function HomePage() {
           ) : (
             <div className="opportunity-list">
               {featured.map((item, index) => (
-                <article key={item.id} className={index === 0 ? "feed-card feed-card-featured" : "feed-card"}>
+                <article
+                  key={item.opportunity_id}
+                  className={index === 0 ? "feed-card feed-card-featured" : "feed-card"}
+                >
                   <div className="feed-card-top">
                     <span className="category-chip">{categoryLabels[item.category] ?? item.category}</span>
                     <span className="deadline-chip">{daysLeft(item.end_date)}</span>

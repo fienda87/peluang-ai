@@ -25,6 +25,12 @@ class IdentityService:
             return None
 
         import json
+
+        def _list(v):
+            if isinstance(v, str):
+                return json.loads(v)
+            return v or []
+
         return {
             "user_id": str(row[0]),
             "education_level": row[1],
@@ -32,10 +38,10 @@ class IdentityService:
             "university": row[3],
             "graduation_year": row[4],
             "cgpa": float(row[5]) if row[5] else None,
-            "skills": json.loads(row[6]) if row[6] else [],
-            "experience": json.loads(row[7]) if row[7] else [],
-            "interests": json.loads(row[8]) if row[8] else [],
-            "goals": json.loads(row[9]) if row[9] else [],
+            "skills": _list(row[6]),
+            "experience": _list(row[7]),
+            "interests": _list(row[8]),
+            "goals": _list(row[9]),
             "location": row[10],
         }
 

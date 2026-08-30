@@ -37,6 +37,8 @@ class Settings(BaseSettings):
 
     embedding_backend: str = "local"
 
+    single_user_mode: bool = True
+
     telegram_bot_token: str = ""
     web_base_url: str = "http://localhost:3000"
 
