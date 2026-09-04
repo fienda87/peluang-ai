@@ -1,4 +1,5 @@
 "use client";
+import { API_URL } from "../../lib/api";
 
 import { useEffect, useRef, useState } from "react";
 
@@ -51,7 +52,7 @@ export default function DashboardPage() {
   // health poll
   useEffect(() => {
     const check = () =>
-      fetch("http://localhost:8000/healthz")
+      fetch(`${API_URL}/healthz`)
         .then((r) => setSys({ api: r.ok }))
         .catch(() => setSys({ api: false }));
     check();
@@ -61,7 +62,7 @@ export default function DashboardPage() {
 
   // SSE stream
   useEffect(() => {
-    const es = new EventSource("http://localhost:8000/pipeline/stream");
+    const es = new EventSource(`${API_URL}/pipeline/stream`);
     es.onmessage = (m) => {
       try {
         const ev: Ev = JSON.parse(m.data);
@@ -75,7 +76,7 @@ export default function DashboardPage() {
   // agents poll
   useEffect(() => {
     const load = () =>
-      fetch("http://localhost:8000/pipeline/agents/status")
+      fetch(`${API_URL}/pipeline/agents/status`)
         .then((r) => r.json())
         .then((d) => setAgents(d.agents || []))
         .catch(() => {});
@@ -86,7 +87,7 @@ export default function DashboardPage() {
 
   // schedule state
   useEffect(() => {
-    fetch("http://localhost:8000/admin/pipeline/schedule")
+    fetch(`${API_URL}/admin/pipeline/schedule`)
       .then((r) => r.json())
       .then((d) => setAuto(d.auto_daily))
       .catch(() => {});
@@ -99,7 +100,7 @@ export default function DashboardPage() {
   async function runNow() {
     setRunning(true);
     try {
-      await fetch("http://localhost:8000/admin/pipeline/run-now", { method: "POST" });
+      await fetch(`${API_URL}/admin/pipeline/run-now`, { method: "POST" });
     } catch {}
     setTimeout(() => setRunning(false), 4000);
   }
@@ -107,7 +108,7 @@ export default function DashboardPage() {
   async function toggleAuto() {
     const next = !(auto ?? false);
     setAuto(next);
-    await fetch("http://localhost:8000/admin/pipeline/schedule", {
+    await fetch(`${API_URL}/admin/pipeline/schedule`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ enable: next }),

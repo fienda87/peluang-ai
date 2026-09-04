@@ -1,4 +1,5 @@
 "use client";
+import { API_URL } from "../../lib/api";
 
 import { useState } from "react";
 
@@ -33,7 +34,7 @@ export default function ProfileForm({ initial }: { initial: Profile | null }) {
   async function save() {
     setBusy(true);
     try {
-      await fetch("http://localhost:8000/profile", {
+      await fetch(`${API_URL}/profile`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -144,7 +145,7 @@ export default function ProfileForm({ initial }: { initial: Profile | null }) {
             type="button"
             onClick={async () => {
               try {
-                const r = await fetch("http://localhost:8000/telegram/link");
+                const r = await fetch(`${API_URL}/telegram/link`);
                 const d = await r.json();
                 setTgUrl(d.url);
               } catch {}

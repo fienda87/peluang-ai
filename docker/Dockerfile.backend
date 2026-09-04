@@ -8,7 +8,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 COPY . .
 
-RUN pip install --no-cache-dir .
+RUN pip install --no-cache-dir --timeout 600 --retries 10 .
 
 EXPOSE 8000
 

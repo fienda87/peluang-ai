@@ -1,3 +1,4 @@
+import { API_URL } from "../../lib/api";
 type Item = {
   id: string;
   title: string;
@@ -9,7 +10,7 @@ type Item = {
 
 async function getApplied(): Promise<Item[]> {
   try {
-    const res = await fetch("http://localhost:8000/profile/applied", {
+    const res = await fetch(`${API_URL}/profile/applied`, {
       cache: "no-store",
     });
     if (!res.ok) return [];

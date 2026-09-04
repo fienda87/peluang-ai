@@ -1,3 +1,4 @@
+import { API_URL } from "../lib/api";
 type FeedItem = {
   id?: string;
   opportunity_id?: string;
@@ -12,7 +13,7 @@ type FeedItem = {
 };
 
 async function getFeed(): Promise<FeedItem[]> {
-  const API = "http://localhost:8000";
+  const API = API_URL;
   try {
     const res = await fetch(`${API}/recommendations?limit=8`, { cache: "no-store" });
     if (res.ok) {
@@ -33,7 +34,7 @@ async function getFeed(): Promise<FeedItem[]> {
 
 async function getProfile() {
   try {
-    const res = await fetch("http://localhost:8000/profile", { cache: "no-store" });
+    const res = await fetch(`${API_URL}/profile`, { cache: "no-store" });
     if (!res.ok) return null;
     return await res.json();
   } catch {
@@ -185,7 +186,7 @@ export default async function HomePage() {
 async function SavedColumn() {
   let items: FeedItem[] = [];
   try {
-    const r = await fetch("http://localhost:8000/profile/saved", { cache: "no-store" });
+    const r = await fetch(`${API_URL}/profile/saved`, { cache: "no-store" });
     if (r.ok) items = await r.json();
   } catch {}
   return (
@@ -202,7 +203,7 @@ async function SavedColumn() {
 async function AppliedColumn() {
   let items: FeedItem[] = [];
   try {
-    const r = await fetch("http://localhost:8000/profile/applied", { cache: "no-store" });
+    const r = await fetch(`${API_URL}/profile/applied`, { cache: "no-store" });
     if (r.ok) items = await r.json();
   } catch {}
   return (

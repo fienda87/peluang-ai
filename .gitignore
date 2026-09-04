@@ -9,6 +9,8 @@ venv/
 
 # Env
 .env
+.env*.local
+!.env.example
 
 # Data
 data/
@@ -26,6 +28,11 @@ Thumbs.db
 node_modules/
 .next/
 out/
+
+# Logs & runtime artifacts
+logs/
+*.log
+storage_data/
 
 # Docker volumes
 pgdata/

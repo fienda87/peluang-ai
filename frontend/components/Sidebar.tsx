@@ -1,4 +1,5 @@
 "use client";
+import { API_URL } from "../lib/api";
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -33,7 +34,7 @@ export default function Sidebar() {
       1000
     );
     const check = () =>
-      fetch("http://localhost:8000/healthz")
+      fetch(`${API_URL}/healthz`)
         .then((r) => setApiUp(r.ok))
         .catch(() => setApiUp(false));
     check();

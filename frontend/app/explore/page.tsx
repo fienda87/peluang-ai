@@ -1,3 +1,4 @@
+import { API_URL } from "../../lib/api";
 type Opportunity = {
   id: string;
   title: string;
@@ -11,7 +12,7 @@ type Opportunity = {
 async function searchOpportunities(q: string): Promise<Opportunity[]> {
   try {
     const res = await fetch(
-      `http://localhost:8000/opportunities?q=${encodeURIComponent(q)}&limit=20`,
+      `${API_URL}/opportunities?q=${encodeURIComponent(q)}&limit=20`,
       { cache: "no-store" }
     );
     if (!res.ok) return [];

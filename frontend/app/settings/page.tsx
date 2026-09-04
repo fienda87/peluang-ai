@@ -1,4 +1,5 @@
 "use client";
+import { API_URL } from "../../lib/api";
 
 import { useEffect, useState } from "react";
 
@@ -7,7 +8,7 @@ export default function SettingsPage() {
   const [running, setRunning] = useState(false);
   const [msg, setMsg] = useState("");
 
-  const API = "http://localhost:8000";
+  const API = API_URL;
 
   useEffect(() => {
     fetch(`${API}/admin/pipeline/schedule`)

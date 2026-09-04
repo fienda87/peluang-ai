@@ -1,3 +1,4 @@
+import { API_URL } from "../../lib/api";
 type Item = {
   id: string;
   title: string;
@@ -9,7 +10,7 @@ type Item = {
 
 async function getSaved(): Promise<Item[]> {
   try {
-    const res = await fetch("http://localhost:8000/profile/saved", {
+    const res = await fetch(`${API_URL}/profile/saved`, {
       cache: "no-store",
     });
     if (!res.ok) return [];

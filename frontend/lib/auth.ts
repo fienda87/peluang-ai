@@ -1,4 +1,5 @@
-const API = "http://localhost:8000";
+import { API_URL } from "./api";
+const API = API_URL;
 
 export function getToken(): string | null {
   if (typeof window === "undefined") return null;

@@ -1,8 +1,9 @@
+import { API_URL } from "../../lib/api";
 import ProfileForm from "./form";
 
 async function getProfile() {
   try {
-    const res = await fetch("http://localhost:8000/profile", { cache: "no-store" });
+    const res = await fetch(`${API_URL}/profile`, { cache: "no-store" });
     if (!res.ok) return null;
     return await res.json();
   } catch {
